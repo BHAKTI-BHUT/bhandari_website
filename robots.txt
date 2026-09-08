@@ -1,0 +1,13 @@
+User-agent: *
+Disallow: /error/
+Disallow: /system/
+Disallow: /application/
+Disallow: /admin-area-panel.php
+Disallow: /clear_laravel_cache.php
+Disallow: /db_test.php
+Disallow: /test_otp_delivery.php
+
+Allow: /assets/
+Allow: /uploads/
+
+Sitemap: https://bhandaripackersandmovers.in/sitemap.xml  

@@ -1,0 +1,46 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Force HTTPS (Only on live site)
+  RewriteCond %{HTTP_HOST} ^(www\.)?bhandaripackersandmovers\.in$ [NC]
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://bhandaripackersandmovers.in/$1 [L,R=301]
+  
+  # Force non-www domain (Only on live site)
+  RewriteCond %{HTTP_HOST} ^www\.bhandaripackersandmovers\.in$ [NC]
+  RewriteRule ^(.*)$ https://bhandaripackersandmovers.in/$1 [L,R=301]
+  
+  # 301 Redirect duplicate and legacy URLs to primary canonical URLs
+  RewriteRule ^index\.html$ / [R=301,L]
+  RewriteRule ^cancellation-and-refund$ /cancellation-refund [R=301,L]
+  RewriteRule ^our-branches$ /branches [R=301,L]
+  RewriteRule ^privacy$ /privacy-policy [R=301,L]
+  RewriteRule ^sector-34-grater-noida-packers-movers-uttar-pradesh$ /sector-34-greater-noida-packers-movers-uttar-pradesh [R=301,L]
+  
+  # CodeIgniter Rewrite (using query string ? for compatibility)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php?/$1 [L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+	AddType x-font/woff .woff
+	AddType x-font/ttf .ttf
+	AddOutputFilterByType DEFLATE image/svg+xml
+	AddOutputFilterByType DEFLATE text/plain
+	AddOutputFilterByType DEFLATE text/html
+	AddOutputFilterByType DEFLATE text/xml
+	AddOutputFilterByType DEFLATE text/css
+	AddOutputFilterByType DEFLATE text/javascript
+	AddOutputFilterByType DEFLATE application/xml
+	AddOutputFilterByType DEFLATE application/xhtml+xml
+	AddOutputFilterByType DEFLATE application/rss+xml
+	AddOutputFilterByType DEFLATE application/javascript
+	AddOutputFilterByType DEFLATE application/x-javascript
+	AddOutputFilterByType DEFLATE application/x-font-ttf
+	AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
+	AddOutputFilterByType DEFLATE font/opentype font/ttf font/eot font/otf
+</IfModule>
+
+
+

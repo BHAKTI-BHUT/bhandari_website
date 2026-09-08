@@ -1,0 +1,170 @@
+{
+    "html_attributions": [],
+    "result": {
+        "address_components": [
+            {
+                "long_name": "Office No. 504",
+                "short_name": "Office No. 504",
+                "types": [
+                    "subpremise"
+                ]
+            },
+            {
+                "long_name": "Baba Arcade",
+                "short_name": "Baba Arcade",
+                "types": [
+                    "premise"
+                ]
+            },
+            {
+                "long_name": "Harola",
+                "short_name": "Harola",
+                "types": [
+                    "political",
+                    "sublocality",
+                    "sublocality_level_2"
+                ]
+            },
+            {
+                "long_name": "Sector 5",
+                "short_name": "Sector 5",
+                "types": [
+                    "political",
+                    "sublocality",
+                    "sublocality_level_1"
+                ]
+            },
+            {
+                "long_name": "Noida",
+                "short_name": "Noida",
+                "types": [
+                    "locality",
+                    "political"
+                ]
+            },
+            {
+                "long_name": "Gautam Buddha Nagar",
+                "short_name": "Gautam Buddha Nagar",
+                "types": [
+                    "administrative_area_level_3",
+                    "political"
+                ]
+            },
+            {
+                "long_name": "Meerut Division",
+                "short_name": "Meerut Division",
+                "types": [
+                    "administrative_area_level_2",
+                    "political"
+                ]
+            },
+            {
+                "long_name": "Uttar Pradesh",
+                "short_name": "UP",
+                "types": [
+                    "administrative_area_level_1",
+                    "political"
+                ]
+            },
+            {
+                "long_name": "India",
+                "short_name": "IN",
+                "types": [
+                    "country",
+                    "political"
+                ]
+            },
+            {
+                "long_name": "201301",
+                "short_name": "201301",
+                "types": [
+                    "postal_code"
+                ]
+            }
+        ],
+        "formatted_address": "Office No. 504, Baba Arcade, Harola, Sector 5, Noida, Uttar Pradesh 201301, India",
+        "geometry": {
+            "location": {
+                "lat": 28.5878278,
+                "lng": 77.3188016
+            },
+            "viewport": {
+                "northeast": {
+                    "lat": 28.5892069802915,
+                    "lng": 77.3201154802915
+                },
+                "southwest": {
+                    "lat": 28.5865090197085,
+                    "lng": 77.31741751970848
+                }
+            }
+        },
+        "name": "Bhandari Packers And Movers",
+        "rating": 4.9,
+        "reviews": [
+            {
+                "author_name": "Aman Yadav",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/110920371170278307996\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocJSlP24xEGrCOGIVIsy3zRsvGWhw7JEFvid8MWKGu0xRHhG6Q=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "in the last week",
+                "text": "Very nice service and experienced workers\nBoys did a great job\nQuick shifting",
+                "time": 1788784310,
+                "translated": false
+            },
+            {
+                "author_name": "Himanshu Sardana",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/116779740638056027723\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocLXPH-fE5-0XDiJ3BqOQ9dKKSs17cIeDbvImO9CgZmTrlJpHg=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "in the last week",
+                "text": "Best packing and moving services will book again",
+                "time": 1788439632,
+                "translated": false
+            },
+            {
+                "author_name": "Aayushi Aggarwal",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/112187060726316434866\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjWQPPR4d_6I0fkZitK1J6-9TCkYeapPFtMhRosKOYX6OVLh3VTh=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "a week ago",
+                "text": "Great experience, very helpful with everything, helped a lot with shifting",
+                "time": 1788256117,
+                "translated": false
+            },
+            {
+                "author_name": "AMAN KUMAR",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/105331995086452450274\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocJEC1_70Pu7uv696YvLebQdu-gL1pPWrUOQDfQQmyqp5V1NgK4=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "a week ago",
+                "text": "Good service",
+                "time": 1788163842,
+                "translated": false
+            },
+            {
+                "author_name": "Ajay Mahi",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/116351071867463329489\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjWNjpygxy0HFngEdPQWmOz9D40cuxqGier2Cmu0Cb0jt9-seCY5=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "a week ago",
+                "text": "Good experience bhandari packers and movers",
+                "time": 1787795178,
+                "translated": false
+            }
+        ],
+        "url": "https:\/\/maps.google.com\/?cid=11321227447965075053",
+        "user_ratings_total": 18
+    },
+    "status": "OK"
+}

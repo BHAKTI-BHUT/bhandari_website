@@ -1,0 +1,70 @@
+========================================================================
+BHANDARI PACKERS AND MOVERS - RECENTLY UPDATED FILES FOR LIVE DEPLOYMENT
+Generated: 2026-07-28 19:32 (Last 3 Days Updates)
+========================================================================
+
+--- CONFIGURATION FILES ---
+[ ] application/config/constants.php
+    (Note: Check Razorpay keys inside this file. Make sure to uncomment live keys and comment test keys before pushing to production!)
+[ ] index.php
+    (Note: Timezone set to Asia/Kolkata added at the top)
+[ ] application/config/config.php
+    (Note: Timezone set to Asia/Kolkata added at the top)
+
+--- CONTROLLER FILES ---
+[ ] application/modules/contacts/controllers/Contacts.php
+
+--- VIEW FILES ---
+[ ] application/modules/contacts/views/login_modal.php
+[ ] application/modules/contacts/views/online_booking.php
+[ ] application/modules/contacts/views/serviceform.php
+[ ] application/modules/contacts/views/my_bookings.php
+[ ] application/modules/contacts/views/quotemodal.php
+[ ] application/modules/contacts/views/quoteform.php
+
+--- TEMPLATE FILES ---
+[ ] application/modules/template/views/navigation.php
+[ ] application/modules/template/views/footer.php
+
+--- OPTIONAL (EARLIER UPDATES - JULY 25-26) ---
+[ ] application/modules/contacts/views/mobile_quote_modal.php
+[ ] application/modules/home/views/home.php
+[ ] application/modules/template/views/slider.php
+[ ] assets/css/style.css
+
+
+
+
+
+------for live key add:
+application/config/constants.php(change only this file)
+my_bookings.php and online_booking.php
+
+// ── TEST MODE (Local) ─────────────────────────────────────────────────────
+define('RAZORPAY_KEY_ID',     'rzp_test_TA6iZxnniOKbaO');
+define('RAZORPAY_KEY_SECRET', 'DPbGYDstDJ3cyMiUOSmtoJH4');
+define('RAZORPAY_WEBHOOK_SECRET', 'bhandari_test_webhook_secret_2026');
+
+// ── LIVE MODE (Production) — Uncomment below & comment above when deploying ──
+// define('RAZORPAY_KEY_ID',     'rzp_live_TFidvL3276AhNp');
+// define('RAZORPAY_KEY_SECRET', 'mlbDSjCya1UISGeqITg0b5r0');
+// define('RAZORPAY_WEBHOOK_SECRET', 'bhandari_live_webhook_secret_2026');
+
+------------------------------------------------------
+
+--- LARAVEL ADMIN PANEL UPDATED FILES ---
+[ ] app/Http/Controllers/Backend/BookingRequestController.php
+    (Note: Order by ID descending added to index function to show latest bookings first)
+[ ] app/Http/Controllers/Backend/BookingController.php
+    (Note: Order by ID descending added to index function to show latest bookings first)
+[ ] resources/views/Backend/Booking/Create.blade.php
+    (Note: Replace this file in your Laravel admin panel directory "d:/ServiceHub" to activate real-time fuzzy geocoding search in booking creation)
+------------------------------------------------------
+
+29-07
+xampp\htdocs\public_web\application\modules\contacts\views\online_booking.php
+application/modules/contacts/views/serviceform.php
+
+
+D:\ServiceHub\resources\views\Backend\Booking\Create.blade.php
+D:\ServiceHub\resources\views\Backend\Booking\Edit.blade.php

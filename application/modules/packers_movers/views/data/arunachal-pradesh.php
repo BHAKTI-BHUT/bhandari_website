@@ -1,0 +1,30 @@
+<?php
+//SELECT name as nm,latitude as lat,longitude as lon,state_code as sc FROM `cities` WHERE state_code='AR'
+$cities = array(
+		array('nm' => 'Along','lat' => '28.16951000','lon' => '94.80060000','sc' => 'AR'),
+		array('nm' => 'Anjaw','lat' => '28.06549000','lon' => '96.82878000','sc' => 'AR'),
+		array('nm' => 'Bomdila','lat' => '27.26475000','lon' => '92.42472000','sc' => 'AR'),
+		array('nm' => 'Basar','lat' => '27.99008000','lon' => '94.69451000','sc' => 'AR'),
+		array('nm' => 'Changlang','lat' => '27.36265000','lon' => '96.34518000','sc' => 'AR'),
+		array('nm' => 'Dibang Valley','lat' => '28.70000000','lon' => '95.70000000','sc' => 'AR'),
+		array('nm' => 'East Kameng','lat' => '27.30000000','lon' => '93.05000000','sc' => 'AR'),
+		array('nm' => 'East Siang','lat' => '28.12379000','lon' => '95.16339000','sc' => 'AR'),
+		array('nm' => 'Hayuliang','lat' => '28.07301000','lon' => '96.54305000','sc' => 'AR'),
+		array('nm' => 'Itanagar','lat' => '27.08694000','lon' => '93.60987000','sc' => 'AR'),
+		array('nm' => 'Khonsa','lat' => '27.01667000','lon' => '95.56667000','sc' => 'AR'),
+		array('nm' => 'Kurung Kumey','lat' => '27.99983000','lon' => '93.39240000','sc' => 'AR'),
+		array('nm' => 'Lohit District','lat' => '27.84012000','lon' => '96.19521000','sc' => 'AR'),
+		array('nm' => 'Lower Dibang Valley','lat' => '28.37258000','lon' => '95.88040000','sc' => 'AR'),
+		array('nm' => 'Lower Subansiri','lat' => '27.62554000','lon' => '93.93908000','sc' => 'AR'),
+		array('nm' => 'Margherita','lat' => '27.28482000','lon' => '95.66796000','sc' => 'AR'),
+		array('nm' => 'Naharlagun','lat' => '27.10467000','lon' => '93.69518000','sc' => 'AR'),
+		array('nm' => 'Pasighat','lat' => '28.06631000','lon' => '95.32678000','sc' => 'AR'),
+		array('nm' => 'Tawang','lat' => '27.57417000','lon' => '91.92437000','sc' => 'AR'),
+		array('nm' => 'Tezu','lat' => '27.91256000','lon' => '96.12882000','sc' => 'AR'),
+		array('nm' => 'Tirap','lat' => '27.01917000','lon' => '95.51788000','sc' => 'AR'),
+		array('nm' => 'Upper Siang','lat' => '28.83355000','lon' => '94.91806000','sc' => 'AR'),
+		array('nm' => 'Upper Subansiri','lat' => '28.30000000','lon' => '94.00000000','sc' => 'AR'),
+		array('nm' => 'West Kameng','lat' => '27.40000000','lon' => '92.35000000','sc' => 'AR'),
+		array('nm' => 'West Siang','lat' => '28.40000000','lon' => '94.55000000','sc' => 'AR'),
+		array('nm' => 'Ziro','lat' => '27.59497000','lon' => '93.83854000','sc' => 'AR')
+);

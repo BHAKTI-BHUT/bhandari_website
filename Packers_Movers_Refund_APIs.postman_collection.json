@@ -1,0 +1,514 @@
+{
+  "info": {
+    "_postman_id": "bhandari-refund-api-v1",
+    "name": "Bhandari Packers - Refund & Cancellation APIs",
+    "description": "API collection for Booking Cancellation & Refund Management System (Mobile App + Admin).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost/public_web",
+      "type": "string"
+    },
+    {
+      "key": "customer_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "booking_id",
+      "value": "10",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Request Cancellation & Refund (Web - Session Auth)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/contacts/request-cancellation-refund",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "contacts",
+            "request-cancellation-refund"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "booking_id",
+              "value": "{{booking_id}}"
+            },
+            {
+              "key": "payment_type",
+              "value": "advance",
+              "description": "advance | final | full"
+            },
+            {
+              "key": "cancellation_reason",
+              "value": "Changed plan"
+            },
+            {
+              "key": "reason_details",
+              "value": "We changed our moving date."
+            },
+            {
+              "key": "refund_method",
+              "value": "upi",
+              "description": "original_source | upi | bank_transfer"
+            },
+            {
+              "key": "upi_id",
+              "value": "user@upi"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Get Refund Status (Web - Session Auth)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/contacts/get-refund-status?booking_id={{booking_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "contacts",
+            "get-refund-status"
+          ],
+          "query": [
+            {
+              "key": "booking_id",
+              "value": "{{booking_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. [Mobile App] Request Refund",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/request-refund",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "request-refund"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "customer_id",
+              "value": "{{customer_id}}"
+            },
+            {
+              "key": "booking_id",
+              "value": "{{booking_id}}"
+            },
+            {
+              "key": "payment_type",
+              "value": "advance",
+              "description": "advance | final | full"
+            },
+            {
+              "key": "cancellation_reason",
+              "value": "Found cheaper option"
+            },
+            {
+              "key": "reason_details",
+              "value": "Found a better deal elsewhere."
+            },
+            {
+              "key": "refund_method",
+              "value": "original_source",
+              "description": "original_source | upi | bank_transfer"
+            },
+            {
+              "key": "upi_id",
+              "value": ""
+            },
+            {
+              "key": "bank_account_no",
+              "value": ""
+            },
+            {
+              "key": "bank_ifsc",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. [Mobile App] Get Refund Status",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/get-refund-status?customer_id={{customer_id}}&booking_id={{booking_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "get-refund-status"
+          ],
+          "query": [
+            {
+              "key": "customer_id",
+              "value": "{{customer_id}}"
+            },
+            {
+              "key": "booking_id",
+              "value": "{{booking_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. [Mobile App] My Bookings with Refund Info",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/my-bookings?customer_id={{customer_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "my-bookings"
+          ],
+          "query": [
+            {
+              "key": "customer_id",
+              "value": "{{customer_id}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. [Admin] Approve Refund Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/contacts/admin-process-refund",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "contacts",
+            "admin-process-refund"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "refund_request_id",
+              "value": "1"
+            },
+            {
+              "key": "action",
+              "value": "approve",
+              "description": "approve | reject | refund"
+            },
+            {
+              "key": "approved_amount",
+              "value": "550.00"
+            },
+            {
+              "key": "admin_remarks",
+              "value": "Advance refund approved as per policy."
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. [Admin] Reject Refund Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/contacts/admin-process-refund",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "contacts",
+            "admin-process-refund"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "refund_request_id",
+              "value": "1"
+            },
+            {
+              "key": "action",
+              "value": "reject"
+            },
+            {
+              "key": "approved_amount",
+              "value": "0"
+            },
+            {
+              "key": "admin_remarks",
+              "value": "Cancellation not eligible as shifting already started."
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. [Admin] Process Actual Refund (Mark as Refunded)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/contacts/admin-process-refund",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "contacts",
+            "admin-process-refund"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "refund_request_id",
+              "value": "1"
+            },
+            {
+              "key": "action",
+              "value": "refund"
+            },
+            {
+              "key": "approved_amount",
+              "value": "550.00"
+            },
+            {
+              "key": "gateway_refund_id",
+              "value": "rfnd_XXXXXXXX",
+              "description": "Razorpay refund ID (optional)"
+            },
+            {
+              "key": "admin_remarks",
+              "value": "Refund processed via Razorpay."
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. [Vendor App] Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/vendor/send-otp",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "vendor",
+            "send-otp"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "mobile",
+              "value": "9876543210"
+            },
+            {
+              "key": "name",
+              "value": "Test Vendor"
+            },
+            {
+              "key": "email",
+              "value": "vendor@test.com"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. [Vendor App] Verify OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/vendor/verify-otp",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "vendor",
+            "verify-otp"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "mobile",
+              "value": "9876543210"
+            },
+            {
+              "key": "otp",
+              "value": "123456"
+            },
+            {
+              "key": "name",
+              "value": "Test Vendor"
+            },
+            {
+              "key": "email",
+              "value": "vendor@test.com"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11. [Supervisor App] Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/supervisor/send-otp",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "supervisor",
+            "send-otp"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "mobile",
+              "value": "9876543210"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12. [Supervisor App] Verify OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/supervisor/verify-otp",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "supervisor",
+            "verify-otp"
+          ]
+        },
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "mobile",
+              "value": "9876543210"
+            },
+            {
+              "key": "otp",
+              "value": "123456"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
