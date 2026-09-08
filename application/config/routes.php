@@ -69,6 +69,8 @@ try {
 
 $route["branches"]="packers_movers/state";
 $route["testimonials"]="about/testimonials";
+$route["reviews"]="about/testimonials";
+$route["customer-reviews"]="about/testimonials";
 $route['cancellation-refund'] = 'about/cancellation_refund';
 $route['cancellation-and-refund'] = 'about/cancellation_refund';
 $route["privacy"]="about/privacy";
