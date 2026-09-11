@@ -12,19 +12,20 @@ try {
 ?>
 <header class="site-header sticky-top" style="z-index: 1050;">
 <div class="top-bar">
-    <div class="container-fluid px-3">
-        <div class="top-bar-links d-flex align-items-center justify-content-start justify-content-md-center gap-2 gap-md-3 w-100">
+    <div class="container-fluid px-2 px-md-3">
+        <div class="top-bar-links d-flex align-items-center justify-content-evenly justify-content-md-center gap-1 gap-md-3 w-100">
             <a href="<?=site_url('services')?>" class="top-bar-link">Our Services</a>
             <span class="top-bar-divider">|</span>
             <a href="<?=site_url('why-choose-us')?>" class="top-bar-link">Why Choose Us</a>
             <span class="top-bar-divider">|</span>
             <a href="<?=site_url('branches')?>" class="top-bar-link">Branch Address</a>
-            <span class="top-bar-divider">|</span>
-            <a href="tel:<?= !empty($phone) ? $phone : '7303257332' ?>" class="top-bar-link">Contact 24x7 <?= !empty($phone) ? $phone : '7303257332' ?></a>
-            <span class="top-bar-divider">|</span>
-            <a href="<?=site_url('reviews')?>" class="top-bar-link">Complain & Review</a>
-            <span class="top-bar-divider">|</span>
-            <span class="top-bar-badge">* Since 2010 at your service *</span>
+
+            <span class="top-bar-divider d-none d-md-inline">|</span>
+            <a href="tel:<?= !empty($phone) ? $phone : '7303257332' ?>" class="top-bar-link d-none d-md-inline">Contact 24x7 <?= !empty($phone) ? $phone : '7303257332' ?></a>
+            <span class="top-bar-divider d-none d-md-inline">|</span>
+            <a href="<?=site_url('reviews')?>" class="top-bar-link d-none d-md-inline">Complain & Review</a>
+            <span class="top-bar-divider d-none d-md-inline">|</span>
+            <span class="top-bar-badge d-none d-md-inline">* Since 2010 at your service *</span>
         </div>
     </div>
 </div>
@@ -44,35 +45,7 @@ try {
     font-size: 0.78rem;
     padding: 6px 0;
     margin: 0 !important;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none !important; /* Firefox */
-    -ms-overflow-style: none !important; /* IE/Edge */
-}
-.top-bar::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-}
-.top-bar .container-fluid {
-    padding-left: 15px;
-    padding-right: 15px;
-}
-@media (max-width: 767.98px) {
-    .top-bar .container-fluid {
-        padding-right: 30px; /* Ensures text doesn't cut off at edge on mobile scroll */
-    }
-}
-.top-bar-links {
-    min-width: max-content;
-}
-@media (min-width: 768px) {
-    .top-bar-links {
-        justify-content: center !important;
-        width: 100% !important;
-    }
+    overflow-x: hidden;
 }
 .top-bar-link {
     color: #ffffff !important;
@@ -97,6 +70,60 @@ try {
     font-weight: 700;
     font-size: 0.76rem;
     white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    .top-bar-link {
+        font-size: 0.72rem !important;
+    }
+    .top-bar-divider {
+        font-size: 0.65rem !important;
+    }
+    .top-bar-links {
+        justify-content: space-evenly !important;
+        width: 100% !important;
+    }
+}
+
+/* ─── Premium Mobile Responsive SweetAlert2 Popups ─── */
+.swal2-container {
+    padding: 10px !important;
+}
+.swal2-popup {
+    width: 88% !important;
+    max-width: 360px !important;
+    border-radius: 20px !important;
+    padding: 1.5rem 1.25rem !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22) !important;
+}
+.swal2-icon {
+    margin: 0.5rem auto 1rem !important;
+    transform: scale(0.85);
+}
+.swal2-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: #1a1a2e !important;
+    padding: 0 0 0.5rem !important;
+}
+.swal2-html-container {
+    font-size: 0.9rem !important;
+    color: #555 !important;
+    margin: 0 0 1.25rem !important;
+}
+.swal2-actions {
+    margin: 0 !important;
+    width: 100% !important;
+}
+.swal2-styled.swal2-confirm {
+    width: 100% !important;
+    height: 44px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #FC5D09, #ff4b2b) !important;
+    box-shadow: 0 4px 14px rgba(252, 93, 9, 0.3) !important;
+    margin: 0 !important;
 }
 
 /* ─── Main Navbar Responsive Container ─── */
