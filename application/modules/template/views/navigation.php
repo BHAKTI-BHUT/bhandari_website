@@ -10,26 +10,16 @@ try {
     log_message('error', 'Nav services load error: ' . $e->getMessage());
 }
 ?>
-<div class="top-bar d-none d-md-block" style="background-color: #FC5D09; margin: 0; margin-top: 0;">
-    <div class="container">
-        <div class="row d-flex justify-content-between align-items-center flex-wrap">
-
-            <!-- <div class="d-flex flex-wrap justify-content-between justify-content-md-start align-items-center gap-2 small">
-                <a class="text-white text-decoration-none d-flex align-items-center" href="<?= $mailhtml ?>">
-                    <i class="fas fa-envelope me-1 text-white"></i>FLAT 10% off on first order
-                </a>
-                <a class="text-white text-decoration-none d-flex align-items-center" href="tel:<?= $phone ?>">
-                    <i class="bi bi-telephone-fill me-1 text-white"></i> <?= $phone ?>
-                </a>
-            </div> -->
-
-            <div class="text-end d-none d-xl-block text-white">
-                <a href="<?=site_url('services')?>" class="text-white"><small class="fw-bold">Our Services</small></a> | 
-                <a href="<?=site_url('why-choose-us')?>" class="text-white"><small class="fw-bold">Why Choose Us</small></a> | 
-                <a href="<?=site_url('branches')?>" class="text-white"><small class="fw-bold">Branch Address</small></a> | 
-                <a href="<?=site_url('contacts')?>" class="text-white"><small class="fw-bold">Contact 24x7 <?= $phone ?></small></a> | 
-                <a href="<?=site_url('reviews')?>" class="text-white"><small class="fw-bold">Complain & Review</small></a> | 
-                <small class="fw-bold">* Since 2010 at your service *</small>
+<div class="top-bar" style="background-color: #FC5D09; margin: 0; margin-top: 0;">
+    <div class="container-fluid px-2 px-md-3">
+        <div class="top-bar-scroll d-flex justify-content-start justify-content-md-between align-items-center text-white py-1">
+            <div class="top-links text-white text-nowrap d-flex align-items-center">
+                <a href="<?=site_url('services')?>" class="text-white text-decoration-none me-2"><small class="fw-bold">Our Services</small></a> | 
+                <a href="<?=site_url('why-choose-us')?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Why Choose Us</small></a> | 
+                <a href="<?=site_url('branches')?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Branch Address</small></a> | 
+                <a href="tel:<?= $phone ?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Contact 24x7 <?= $phone ?></small></a> | 
+                <a href="<?=site_url('reviews')?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Complain & Review</small></a> | 
+                <small class="fw-bold ms-2 text-nowrap">* Since 2010 at your service *</small>
             </div>
         </div>
     </div>
@@ -43,6 +33,82 @@ try {
   $nav_initial = $nav_logged_in ? strtoupper(substr($nav_name, 0, 1)) : '';
 ?>
 <style>
+/* ─── Top Bar Styling & Mobile Smooth Ticker Scroll ─── */
+.top-bar {
+    background-color: #FC5D09;
+    font-size: 0.78rem;
+    padding: 3px 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+}
+.top-bar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+.top-bar a:hover {
+    text-decoration: underline !important;
+}
+
+/* ─── Main Navbar Responsive Container ─── */
+.main-navbar {
+    background-color: #fff;
+    padding: 6px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 600;
+}
+.main-navbar .container {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+/* ─── Brand Logo & Text Styling ─── */
+.brand-logo-img {
+    height: 48px;
+    width: auto;
+    max-width: 58px;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+.brand-title-text {
+    font-size: 1.45rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: #FC5D09;
+    letter-spacing: -0.2px;
+}
+
+/* ─── Action Buttons & Quote / Login Buttons ─── */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.nav-quote-btn {
+    background-color: #FC5D09;
+    color: #fff !important;
+    border: none;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    line-height: 1.2;
+    box-shadow: 0 2px 6px rgba(252, 93, 9, 0.25);
+}
+.nav-quote-btn:hover {
+    background-color: #DD3802;
+    color: #fff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(252, 93, 9, 0.35);
+}
+
 /* ─── Navbar User Profile Dropdown ──────────────────────────── */
 .nav-user-wrap {
     position: relative;
@@ -146,51 +212,105 @@ try {
 .nav-user-dropdown .dd-item:hover { background: #fff5ed; color: #FC5D09; }
 .nav-user-dropdown .dd-item i { font-size: 14px; color: #FC5D09; width: 16px; text-align: center; }
 .nav-user-dropdown .dd-item.logout { color: #FC5D09; font-weight: 600; border-top: 1px solid #f5f5f5; }
+
 /* Login button */
 .nav-login-btn {
     background: none;
     border: 2px solid #FC5D09;
     color: #FC5D09;
     border-radius: 8px;
-    padding: 6px 16px;
-    font-size: 0.85rem;
+    padding: 5px 14px;
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     white-space: nowrap;
 }
 .nav-login-btn:hover {
     background: #FC5D09;
     color: #fff;
 }
+
+.hamburger-btn {
+    cursor: pointer;
+    z-index: 1001;
+    transition: transform 0.2s ease;
+    padding: 4px 4px !important;
+    margin-left: 2px;
+}
+.hamburger-btn:hover {
+    transform: scale(1.08);
+}
+.hamburger-btn i {
+    font-size: 1.5rem !important;
+    color: #FC5D09;
+}
+
+/* ─── Mobile Devices Responsive Adjustments (<768px) ─── */
 @media (max-width: 768px) {
-    .navbar-brand h2 {
-        font-size: 0.95rem;
-        margin-bottom: 0;
-        white-space: nowrap;
+    .main-navbar .container {
+        padding-left: 6px;
+        padding-right: 6px;
     }
-    .navbar-brand img {
-        max-height: 38px;
-        width: auto;
-        object-fit: contain;
+    .brand-logo-img {
+        height: 38px;
+        max-width: 42px;
+    }
+    .brand-title-text {
+        font-size: 1.05rem;
     }
     .action-buttons {
-        gap: 6px !important;
+        gap: 4px !important;
+    }
+    .nav-quote-btn {
+        padding: 5px 8px;
+        font-size: 0.72rem;
+        border-radius: 6px;
     }
     .nav-login-btn {
-        padding: 4px 10px;
-        font-size: 0.78rem;
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        border-radius: 6px;
     }
     .nav-user-avatar {
         width: 32px;
         height: 32px;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
     }
-    body {
-        overflow-x: hidden;
+    .hamburger-btn {
+        padding: 2px 2px !important;
+    }
+    .hamburger-btn i {
+        font-size: 1.35rem !important;
+    }
+}
+
+/* ─── Ultra Small Phones (<380px e.g. iPhone SE / Galaxy Fold) ─── */
+@media (max-width: 380px) {
+    .main-navbar .container {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    .brand-logo-img {
+        height: 32px;
+        max-width: 35px;
+    }
+    .brand-title-text {
+        font-size: 0.9rem;
+    }
+    .action-buttons {
+        gap: 3px !important;
+    }
+    .nav-quote-btn {
+        padding: 4px 6px;
+        font-size: 0.68rem;
+    }
+    .nav-login-btn {
+        padding: 4px 6px;
+        font-size: 0.68rem;
     }
 }
 .hover-red {
@@ -203,28 +323,25 @@ try {
 <nav class="main-navbar sticky-top">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center">
-            <a href="<?= site_url() ?>" class="navbar-brand d-flex align-items-center gap-2">
-                <img src="<?= !empty($logo_url) ? $logo_url : base_url('assets/images/logo/logo.jpg') ?>" onerror="this.onerror=null; this.src='<?= base_url('assets/images/logo/logo.jpg') ?>';" alt="Bhandari Packers Logo" width="60" height="60" style="height: 52px; width: auto; max-width: 65px; object-fit: contain;" loading="eager">
-                <h2 class="mb-0" style="font-size: 1.55rem; font-weight: 700; white-space: nowrap; color: #FC5D09;"><?= !empty($brand_short) ? $brand_short : 'Bhandari Packers' ?></h2>
+            <a href="<?= site_url() ?>" class="navbar-brand d-flex align-items-center gap-1 gap-sm-2 me-0">
+                <img src="<?= !empty($logo_url) ? $logo_url : base_url('assets/images/logo/logo.jpg') ?>" onerror="this.onerror=null; this.src='<?= base_url('assets/images/logo/logo.jpg') ?>';" alt="Bhandari Packers Logo" width="60" height="60" class="brand-logo-img" loading="eager">
+                <h2 class="mb-0 brand-title-text"><?= !empty($brand_short) ? $brand_short : 'Bhandari Packers' ?></h2>
             </a>
-            <div class="action-buttons d-flex align-items-center gap-3">
+            <div class="action-buttons d-flex align-items-center">
                 <a href="<?= $phonehtml ?>" class="phone-btn d-none d-md-flex align-items-center gap-2">
                     <i class="fa-solid fa-phone"></i> <?= $phone ?>
                 </a>
-                <!-- <a href="<?= site_url('contacts') ?>" class="track-btn d-none d-lg-flex align-items-center gap-2">
-                    <i class="fas fa-box"></i> Track Your Consignment
-                </a> -->
-                <!-- Desktop Book Shifting -->
                 <a href="<?= site_url('online-booking') ?>" class="track-btn d-none d-lg-flex align-items-center gap-2" onclick="return handleBookShiftingClick(event, '<?= site_url('online-booking') ?>')">
                     <i class="fas fa-truck"></i> Book Shifting
                 </a>
-                <a href="#qtemodal" data-bs-toggle="modal" data-bs-target="#qteModal" class="quote-btn d-none d-lg-inline-block">
-                    Request Site Visit <i class="fas fa-arrow-right ms-1"></i>
+
+                <!-- Request Site Visit Button (Visible on all screens!) -->
+                <a href="#qtemodal" data-bs-toggle="modal" data-bs-target="#qteModal" class="nav-quote-btn">
+                    <span class="d-none d-sm-inline">Request </span>Site Visit <i class="fas fa-arrow-right ms-1" style="font-size: 0.8em;"></i>
                 </a>
 
-
                 <!-- ─── User Profile / Login ──────────────────────────── -->
-                <div class="nav-user-wrap ms-2" id="navUserWrap">
+                <div class="nav-user-wrap" id="navUserWrap">
                     <?php if ($nav_logged_in): ?>
                     <!-- Logged In: avatar + dropdown -->
                     <div class="d-flex align-items-center gap-2" onclick="toggleNavDropdown()" style="cursor:pointer;">
@@ -261,8 +378,8 @@ try {
                 </div>
                 <!-- ─────────────────────────────────────────────────── -->
 
-                <button class="hamburger-btn border-0 bg-transparent p-2" id="hamburgerBtn" aria-label="hamburger-button">
-                    <i class="fas fa-bars fs-1" style="color: #FC5D09;"></i>
+                <button class="hamburger-btn border-0 bg-transparent" id="hamburgerBtn" aria-label="hamburger-button">
+                    <i class="fas fa-bars" style="color: #FC5D09;"></i>
                 </button>
             </div>
         </div>
