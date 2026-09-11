@@ -12,8 +12,8 @@ try {
 ?>
 <header class="site-header sticky-top" style="z-index: 1050;">
 <div class="top-bar">
-    <div class="container-fluid px-3">
-        <div class="top-bar-links d-flex align-items-center justify-content-start justify-content-md-center gap-2 gap-md-3">
+    <div class="container">
+        <div class="top-bar-links d-flex align-items-center justify-content-start gap-2 gap-md-3">
             <a href="<?=site_url('services')?>" class="top-bar-link">Our Services</a>
             <span class="top-bar-divider">|</span>
             <a href="<?=site_url('why-choose-us')?>" class="top-bar-link">Why Choose Us</a>
@@ -42,7 +42,7 @@ try {
     background-color: #FC5D09 !important;
     color: #ffffff !important;
     font-size: 0.78rem;
-    padding: 5px 0;
+    padding: 6px 0;
     margin: 0 !important;
     overflow-x: auto;
     overflow-y: hidden;
@@ -55,6 +55,13 @@ try {
     display: none !important;
     width: 0 !important;
     height: 0 !important;
+}
+.top-bar .container {
+    padding-left: 15px;
+    padding-right: 30px; /* Ensures text doesn't cut off at edge on mobile scroll */
+}
+.top-bar-links {
+    min-width: max-content;
 }
 .top-bar-link {
     color: #ffffff !important;
@@ -84,13 +91,13 @@ try {
 /* ─── Main Navbar Responsive Container ─── */
 .main-navbar {
     background-color: #fff;
-    padding: 6px 0;
+    padding: 8px 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 600;
 }
 .main-navbar .container {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 /* ─── Brand Logo & Text Styling ─── */
@@ -109,35 +116,52 @@ try {
     letter-spacing: -0.2px;
 }
 
-/* ─── Action Buttons & Quote / Login Buttons ─── */
+/* ─── Action Buttons & Quote / Login Buttons Unified Styling ─── */
 .action-buttons {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
-.nav-quote-btn {
-    background-color: #FC5D09;
-    color: #fff !important;
-    border: none;
-    padding: 6px 12px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
+
+.nav-quote-btn, .nav-login-btn {
+    height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    padding: 0 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 6px;
     white-space: nowrap;
-    line-height: 1.2;
-    box-shadow: 0 2px 6px rgba(252, 93, 9, 0.25);
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+.nav-quote-btn {
+    background-color: #FC5D09;
+    color: #ffffff !important;
+    border: 2px solid #FC5D09;
+    box-shadow: 0 2px 6px rgba(252, 93, 9, 0.2);
 }
 .nav-quote-btn:hover {
-    background-color: #DD3802;
-    color: #fff !important;
+    background-color: #e04e00;
+    border-color: #e04e00;
+    color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(252, 93, 9, 0.35);
+}
+
+.nav-login-btn {
+    background-color: transparent;
+    color: #FC5D09 !important;
+    border: 2px solid #FC5D09;
+    cursor: pointer;
+}
+.nav-login-btn:hover {
+    background-color: #FC5D09;
+    color: #ffffff !important;
 }
 
 /* ─── Navbar User Profile Dropdown ──────────────────────────── */
@@ -244,27 +268,6 @@ try {
 .nav-user-dropdown .dd-item i { font-size: 14px; color: #FC5D09; width: 16px; text-align: center; }
 .nav-user-dropdown .dd-item.logout { color: #FC5D09; font-weight: 600; border-top: 1px solid #f5f5f5; }
 
-/* Login button */
-.nav-login-btn {
-    background: none;
-    border: 2px solid #FC5D09;
-    color: #FC5D09;
-    border-radius: 8px;
-    padding: 5px 14px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    white-space: nowrap;
-}
-.nav-login-btn:hover {
-    background: #FC5D09;
-    color: #fff;
-}
-
 .hamburger-btn {
     cursor: pointer;
     z-index: 1001;
@@ -283,28 +286,25 @@ try {
 /* ─── Mobile Devices Responsive Adjustments (<768px) ─── */
 @media (max-width: 768px) {
     .main-navbar .container {
-        padding-left: 6px;
-        padding-right: 6px;
+        padding-left: 10px;
+        padding-right: 10px;
     }
     .brand-logo-img {
         height: 38px;
-        max-width: 42px;
+        max-width: 44px;
     }
     .brand-title-text {
-        font-size: 1.05rem;
+        font-size: 1.08rem;
     }
     .action-buttons {
-        gap: 4px !important;
+        gap: 6px !important;
     }
-    .nav-quote-btn {
-        padding: 5px 8px;
-        font-size: 0.72rem;
+    .nav-quote-btn, .nav-login-btn {
+        height: 32px;
+        padding: 0 10px;
+        font-size: 0.74rem;
         border-radius: 6px;
-    }
-    .nav-login-btn {
-        padding: 4px 8px;
-        font-size: 0.72rem;
-        border-radius: 6px;
+        border-width: 1.5px;
     }
     .nav-user-avatar {
         width: 32px;
@@ -322,26 +322,23 @@ try {
 /* ─── Ultra Small Phones (<380px e.g. iPhone SE / Galaxy Fold) ─── */
 @media (max-width: 380px) {
     .main-navbar .container {
-        padding-left: 4px;
-        padding-right: 4px;
+        padding-left: 6px;
+        padding-right: 6px;
     }
     .brand-logo-img {
         height: 32px;
-        max-width: 35px;
+        max-width: 36px;
     }
     .brand-title-text {
-        font-size: 0.9rem;
+        font-size: 0.92rem;
     }
     .action-buttons {
-        gap: 3px !important;
+        gap: 4px !important;
     }
-    .nav-quote-btn {
-        padding: 4px 6px;
-        font-size: 0.68rem;
-    }
-    .nav-login-btn {
-        padding: 4px 6px;
-        font-size: 0.68rem;
+    .nav-quote-btn, .nav-login-btn {
+        height: 30px;
+        padding: 0 7px;
+        font-size: 0.7rem;
     }
 }
 .hover-red {
