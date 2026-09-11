@@ -10,17 +10,21 @@ try {
     log_message('error', 'Nav services load error: ' . $e->getMessage());
 }
 ?>
-<div class="top-bar" style="background-color: #FC5D09; margin: 0; margin-top: 0;">
-    <div class="container-fluid px-2 px-md-3">
-        <div class="top-bar-scroll d-flex justify-content-start justify-content-md-between align-items-center text-white py-1">
-            <div class="top-links text-white text-nowrap d-flex align-items-center">
-                <a href="<?=site_url('services')?>" class="text-white text-decoration-none me-2"><small class="fw-bold">Our Services</small></a> | 
-                <a href="<?=site_url('why-choose-us')?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Why Choose Us</small></a> | 
-                <a href="<?=site_url('branches')?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Branch Address</small></a> | 
-                <a href="tel:<?= $phone ?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Contact 24x7 <?= $phone ?></small></a> | 
-                <a href="<?=site_url('reviews')?>" class="text-white text-decoration-none mx-2"><small class="fw-bold">Complain & Review</small></a> | 
-                <small class="fw-bold ms-2 text-nowrap">* Since 2010 at your service *</small>
-            </div>
+<header class="site-header sticky-top" style="z-index: 1050;">
+<div class="top-bar">
+    <div class="container-fluid px-3">
+        <div class="top-bar-links d-flex align-items-center justify-content-start justify-content-md-center gap-2 gap-md-3">
+            <a href="<?=site_url('services')?>" class="top-bar-link">Our Services</a>
+            <span class="top-bar-divider">|</span>
+            <a href="<?=site_url('why-choose-us')?>" class="top-bar-link">Why Choose Us</a>
+            <span class="top-bar-divider">|</span>
+            <a href="<?=site_url('branches')?>" class="top-bar-link">Branch Address</a>
+            <span class="top-bar-divider">|</span>
+            <a href="tel:<?= !empty($phone) ? $phone : '7303257332' ?>" class="top-bar-link">Contact 24x7 <?= !empty($phone) ? $phone : '7303257332' ?></a>
+            <span class="top-bar-divider">|</span>
+            <a href="<?=site_url('reviews')?>" class="top-bar-link">Complain & Review</a>
+            <span class="top-bar-divider">|</span>
+            <span class="top-bar-badge">* Since 2010 at your service *</span>
         </div>
     </div>
 </div>
@@ -35,19 +39,46 @@ try {
 <style>
 /* ─── Top Bar Styling & Mobile Smooth Ticker Scroll ─── */
 .top-bar {
-    background-color: #FC5D09;
+    background-color: #FC5D09 !important;
+    color: #ffffff !important;
     font-size: 0.78rem;
-    padding: 3px 0;
+    padding: 5px 0;
+    margin: 0 !important;
     overflow-x: auto;
+    overflow-y: hidden;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
 }
 .top-bar::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
-.top-bar a:hover {
+.top-bar-link {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 0.76rem;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+}
+.top-bar-link:hover {
+    color: #ffffff !important;
+    opacity: 0.85;
     text-decoration: underline !important;
+}
+.top-bar-divider {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 0.72rem;
+    user-select: none;
+}
+.top-bar-badge {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 0.76rem;
+    white-space: nowrap;
 }
 
 /* ─── Main Navbar Responsive Container ─── */
@@ -320,7 +351,7 @@ try {
     color: #FC5D09 !important;
 }
 </style>
-<nav class="main-navbar sticky-top">
+<nav class="main-navbar">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center">
             <a href="<?= site_url() ?>" class="navbar-brand d-flex align-items-center gap-1 gap-sm-2 me-0">
@@ -385,6 +416,7 @@ try {
         </div>
     </div>
 </nav>
+</header>
 <script>
 var _isLoggedIn = <?= $nav_logged_in ? 'true' : 'false' ?>;
 var _postLoginRedirect = null;
