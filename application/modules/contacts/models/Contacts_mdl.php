@@ -24,11 +24,11 @@ class Contacts_mdl extends CI_Model
                 $pass_setting = $admin_db->where('key', 'mail_password')->get('settings')->row();
                 $crypto_setting = $admin_db->where('key', 'mail_encryption')->get('settings')->row();
 
-                if ($host_setting && !empty($host_setting->value)) $smtp_host = $host_setting->value;
+                if ($host_setting && !empty($host_setting->value)) $smtp_host = trim($host_setting->value);
                 if ($port_setting && !empty($port_setting->value)) $smtp_port = intval($port_setting->value);
-                if ($user_setting && !empty($user_setting->value)) $smtp_user = $user_setting->value;
-                if ($pass_setting && !empty($pass_setting->value)) $smtp_pass = $pass_setting->value;
-                if ($crypto_setting && !empty($crypto_setting->value)) $smtp_crypto = $crypto_setting->value;
+                if ($user_setting && !empty($user_setting->value)) $smtp_user = trim($user_setting->value);
+                if ($pass_setting && !empty($pass_setting->value)) $smtp_pass = str_replace(' ', '', $pass_setting->value);
+                if ($crypto_setting && !empty($crypto_setting->value)) $smtp_crypto = trim($crypto_setting->value);
             }
         } catch (Exception $e) {}
 
@@ -50,7 +50,7 @@ class Contacts_mdl extends CI_Model
     private function get_email_settings()
     {
         // Default: send notification to the SMTP sender's inbox itself
-        $smtp_user = $this->config['smtp_user'] ?: 'info@bhandaripackersandmovers.in';
+        $smtp_user = !empty($this->config['smtp_user']) ? $this->config['smtp_user'] : 'info@bhandaripackersandmovers.in';
         $settings = array(
             'to_email'   => $smtp_user,
             'from_email' => $smtp_user,
@@ -75,6 +75,11 @@ class Contacts_mdl extends CI_Model
             }
         } catch (Exception $e) {
             log_message('error', 'get_email_settings error: ' . $e->getMessage());
+        }
+
+        // For Gmail SMTP, if from_email doesn't match smtp_user domain/email, use smtp_user to avoid 550 Unauthenticated error
+        if (strpos($this->config['smtp_host'], 'gmail') !== false && !empty($this->config['smtp_user'])) {
+            $settings['from_email'] = $this->config['smtp_user'];
         }
 
         return $settings;
