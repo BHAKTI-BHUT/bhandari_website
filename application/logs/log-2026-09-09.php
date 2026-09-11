@@ -1,0 +1,30 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+
+ERROR - 2026-09-09 22:55:57 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 22:55:57 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:05:55 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:05:55 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:06:37 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:06:37 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:07:10 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:07:10 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:07:39 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:07:39 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:08:47 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:08:47 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:09:35 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:09:35 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 249
+ERROR - 2026-09-09 23:20:14 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 275
+ERROR - 2026-09-09 23:20:14 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 275
+ERROR - 2026-09-09 23:21:02 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 275
+ERROR - 2026-09-09 23:21:02 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 275
+ERROR - 2026-09-09 23:21:08 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 275
+ERROR - 2026-09-09 23:21:08 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 275
+ERROR - 2026-09-09 23:53:26 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:53:26 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:53:48 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:53:48 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:54:35 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:54:35 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:54:55 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285
+ERROR - 2026-09-09 23:54:55 --> Severity: Warning --> Undefined array key 1 C:\xampp\htdocs\bhandari_website\application\modules\packers_movers\views\view_service.php 285

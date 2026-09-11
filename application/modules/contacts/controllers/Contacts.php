@@ -27,6 +27,44 @@ class Contacts extends MX_Controller
         $this->form_validation->set_rules('date', 'date', 'trim');
         $this->form_validation->set_rules('shifting_time', 'Shifting Time', 'trim');
         if ($this->form_validation->run() == true) {
+            $mfrom = $this->input->post('mfrom');
+            if (!empty($mfrom)) {
+                $mfrom_lower = strtolower($mfrom);
+                $this->load->model('contacts_mdl');
+                $loc_service_settings = $this->contacts_mdl->get_location_service_settings();
+                $raw_allowed_str = !empty($loc_service_settings['allowed_pickup_cities']) ? $loc_service_settings['allowed_pickup_cities'] : 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad';
+                $allowed_keywords = array_filter(array_map('trim', explode(',', strtolower($raw_allowed_str))));
+                
+                $extra_keywords = array();
+                foreach ($allowed_keywords as $kw) {
+                    if ($kw === 'gurugram' || $kw === 'gurgaon') {
+                        $extra_keywords[] = 'gurugram';
+                        $extra_keywords[] = 'gurgaon';
+                    } elseif ($kw === 'delhi' || $kw === 'new delhi') {
+                        $extra_keywords[] = 'delhi';
+                        $extra_keywords[] = 'new delhi';
+                        $extra_keywords[] = 'ncr';
+                    } elseif ($kw === 'noida' || $kw === 'greater noida') {
+                        $extra_keywords[] = 'noida';
+                        $extra_keywords[] = 'greater noida';
+                        $extra_keywords[] = 'gautam buddh';
+                        $extra_keywords[] = 'gautam budh';
+                    }
+                }
+                $allowed_keywords = array_unique(array_merge($allowed_keywords, $extra_keywords));
+
+                $is_allowed = false;
+                foreach ($allowed_keywords as $keyword) {
+                    if ($keyword !== '' && strpos($mfrom_lower, $keyword) !== false) {
+                        $is_allowed = true;
+                        break;
+                    }
+                }
+                if (!$is_allowed) {
+                    echo "<div class='alert alert-danger mb-0'><i class='bi bi-exclamation-triangle-fill me-1'></i> We apologize! Currently, our pickup relocation services operate exclusively from <b>" . htmlspecialchars($raw_allowed_str) . "</b>. Service is unavailable for your selected pickup location.</div>";
+                    return;
+                }
+            }
             $this->session->set_userdata('last_quote_data', array(
                 'mfrom'         => $this->input->post('mfrom'),
                 'mto'           => $this->input->post('mto'),
@@ -218,6 +256,8 @@ class Contacts extends MX_Controller
         } catch (\Exception $e) {
         } catch (\Throwable $e) {
         }
+        $this->load->model('contacts_mdl');
+        $data['loc_settings'] = $this->contacts_mdl->get_location_service_settings();
         $data['pricing_settings'] = $pricingSettings;
 
         $data['title'] = "Online Booking & Live Shifting Quote | Bhandari Packers and Movers";
@@ -622,17 +662,181 @@ class Contacts extends MX_Controller
                 return;
             }
 
-            // 3. Send email notice
+            // 3. Send professional responsive email notice to Admin
             $this->load->model('contacts_mdl');
-            $adminMessage = "<div style='padding:30px;background:#e6e6e6;font-size: 18px !important;'>"
-                . "<h2>New Detailed Online Booking Request Received!</h2>"
-                . "From: <b>$pickup_location</b><br>"
-                . "To: <b>$drop_location</b><br>"
-                . "Phone Number: <b><a href='tel:$phone_number'>$phone_number</a></b><br>"
-                . "Moving Date: <b>$shifting_date</b><br>"
-                . "Estimated Amount: <b>₹" . number_format($estimated_amount, 2) . "</b>"
-                . "</div>";
-            $this->contacts_mdl->send_mail($adminMessage);
+            try {
+                $submission_time = date('D, d M Y \a\t h:i A');
+                $safe_pickup = htmlspecialchars($pickup_location, ENT_QUOTES, 'UTF-8');
+                $safe_drop   = htmlspecialchars($drop_location,   ENT_QUOTES, 'UTF-8');
+                $safe_phone  = htmlspecialchars($phone_number,    ENT_QUOTES, 'UTF-8');
+                $safe_date   = !empty($shifting_date) ? htmlspecialchars(date('d M Y', strtotime($shifting_date)), ENT_QUOTES, 'UTF-8') : 'Not specified';
+                $safe_time   = !empty($shifting_time) ? htmlspecialchars(date('h:i A', strtotime($shifting_time)), ENT_QUOTES, 'UTF-8') : 'Not specified';
+                $formatted_amount = number_format($estimated_amount, 2);
+                $formatted_distance = number_format($distance_km, 1);
+
+                $adminMessage = "
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>New Online Shifting Booking</title>
+</head>
+<body style='margin:0;padding:0;background-color:#f4f6f9;font-family:Segoe UI,Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9;'>
+    <tr>
+      <td align='center' style='padding:30px 15px;'>
+        <table width='600' cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);'>
+
+          <!-- Header -->
+          <tr>
+            <td style='background:linear-gradient(135deg,#FC5D09,#DD3802);padding:30px 35px;text-align:center;'>
+              <h1 style='margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;'>
+                &#128666; New Online Booking Created!
+              </h1>
+              <p style='margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;'>
+                Bhandari Packers and Movers &mdash; Detailed Shifting Booking
+              </p>
+            </td>
+          </tr>
+
+          <!-- Alert bar -->
+          <tr>
+            <td style='background:#fff8f5;border-left:4px solid #FC5D09;padding:12px 35px;'>
+              <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                <tr>
+                  <td>
+                    <p style='margin:0;font-size:13px;color:#555;'>
+                      &#128197; Received on: <strong style='color:#FC5D09;'>{$submission_time}</strong>
+                    </p>
+                  </td>
+                  <td align='right'>
+                    <span style='display:inline-block;background:#e6f4ea;color:#137333;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;'>&#10004; Verified Mobile</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style='padding:30px 35px;'>
+
+              <!-- Customer Phone -->
+              <h2 style='margin:0 0 15px;font-size:15px;color:#0b2356;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #f0f0f0;padding-bottom:8px;'>
+                Customer Contact
+              </h2>
+
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:22px;'>
+                <tr>
+                  <td width='40' style='vertical-align:top;padding-top:2px;'>
+                    <div style='width:36px;height:36px;background:#fff3ee;border-radius:50%;text-align:center;line-height:36px;font-size:17px;'>&#128222;</div>
+                  </td>
+                  <td style='padding-left:12px;'>
+                    <p style='margin:0;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;'>Verified Phone Number</p>
+                    <p style='margin:3px 0 0;font-size:16px;font-weight:600;color:#1a1a2e;'>
+                      <a href='tel:{$safe_phone}' style='color:#FC5D09;text-decoration:none;'>{$safe_phone}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Booking & Route Details -->
+              <h2 style='margin:0 0 15px;font-size:15px;color:#0b2356;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #f0f0f0;padding-bottom:8px;'>
+                Booking &amp; Route Details
+              </h2>
+
+              <div style='background:#f8f9fc;border-radius:8px;padding:20px;border-left:4px solid #FC5D09;margin-bottom:20px;'>
+                <!-- Pickup -->
+                <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:14px;'>
+                  <tr>
+                    <td width='30' style='vertical-align:top;padding-top:2px;'>
+                      <span style='font-size:18px;'>&#128205;</span>
+                    </td>
+                    <td>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Pickup Location (From)</p>
+                      <p style='margin:3px 0 0;font-size:15px;font-weight:600;color:#222;'>{$safe_pickup}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Drop -->
+                <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:14px;'>
+                  <tr>
+                    <td width='30' style='vertical-align:top;padding-top:2px;'>
+                      <span style='font-size:18px;'>&#127919;</span>
+                    </td>
+                    <td>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Drop Location (To)</p>
+                      <p style='margin:3px 0 0;font-size:15px;font-weight:600;color:#222;'>{$safe_drop}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Distance, Date, Time & Amount Grid -->
+                <table width='100%' cellpadding='0' cellspacing='0' border='0' style='border-top:1px dashed #e0e0e0;padding-top:14px;margin-top:10px;'>
+                  <tr>
+                    <td width='50%' style='vertical-align:top;padding-bottom:12px;'>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Route Distance</p>
+                      <p style='margin:3px 0 0;font-size:14px;font-weight:600;color:#1a1a2e;'>&#128739; {$formatted_distance} KM</p>
+                    </td>
+                    <td width='50%' style='vertical-align:top;padding-bottom:12px;'>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Shifting Date</p>
+                      <p style='margin:3px 0 0;font-size:14px;font-weight:600;color:#FC5D09;'>&#128197; {$safe_date}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width='50%' style='vertical-align:top;'>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Shifting Time</p>
+                      <p style='margin:3px 0 0;font-size:14px;font-weight:600;color:#0b2356;'>&#9200; {$safe_time}</p>
+                    </td>
+                    <td width='50%' style='vertical-align:top;'>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Estimated Fare</p>
+                      <p style='margin:3px 0 0;font-size:16px;font-weight:700;color:#2e7d32;'>&#8377;{$formatted_amount}</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- CTA Buttons -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-top:25px;'>
+                <tr>
+                  <td style='padding-bottom:10px;'>
+                    <a href='tel:{$safe_phone}'
+                       style='display:block;width:100%;box-sizing:border-box;background:#FC5D09;color:#ffffff;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;text-align:center;letter-spacing:0.3px;'>
+                      &#128222;&nbsp;&nbsp;Call Customer Now ({$safe_phone})
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style='background:#f8f9fc;border-top:1px solid #eee;padding:20px 35px;text-align:center;'>
+              <p style='margin:0;font-size:12px;color:#999;'>
+                This email was generated automatically by the online booking system on
+                <a href='https://bhandaripackersandmovers.in' style='color:#FC5D09;text-decoration:none;'>bhandaripackersandmovers.in</a>
+              </p>
+              <p style='margin:6px 0 0;font-size:12px;color:#bbb;'>
+                &copy; " . date('Y') . " Bhandari Packers and Movers. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
+
+                $this->contacts_mdl->send_mail($adminMessage, 'New Online Booking Received - Rs. ' . $formatted_amount);
+            } catch (\Throwable $e) {
+                log_message('error', 'Online booking email notice failed: ' . $e->getMessage());
+            }
 
             // Do not send a second “request created” WhatsApp here. The single
             // booking-confirmation message is sent only after the registration

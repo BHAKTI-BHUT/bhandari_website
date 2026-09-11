@@ -218,9 +218,10 @@ try {
                 <a href="<?= site_url('online-booking') ?>" class="track-btn d-none d-lg-flex align-items-center gap-2" onclick="return handleBookShiftingClick(event, '<?= site_url('online-booking') ?>')">
                     <i class="fas fa-truck"></i> Book Shifting
                 </a>
-                <a href="#qtemodal" data-bs-toggle="modal" data-bs-target="#qteModal" class="quote-btn d-none d-md-inline-block">
-                    Request Site Visit <i class="fas fa-arrow-right"></i>
+                <a href="#qtemodal" data-bs-toggle="modal" data-bs-target="#qteModal" class="quote-btn d-none d-lg-inline-block">
+                    Request Site Visit <i class="fas fa-arrow-right ms-1"></i>
                 </a>
+
 
                 <!-- ─── User Profile / Login ──────────────────────────── -->
                 <div class="nav-user-wrap ms-2" id="navUserWrap">

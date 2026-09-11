@@ -119,9 +119,9 @@ foreach ($sliders_list as $sl) {
     <?php endforeach; ?>
 
     <?php if (count($sliders_list) > 1): ?>
-        <div class="slider-arrows">
-            <button class="slider-arrow prev-arrow"><i class="bi bi-chevron-left"></i></button>
-            <button class="slider-arrow next-arrow"><i class="bi bi-chevron-right"></i></button>
+        <div class="slider-arrows d-none d-lg-flex">
+            <button class="slider-arrow prev-arrow" aria-label="Previous Slide"><i class="bi bi-chevron-left"></i></button>
+            <button class="slider-arrow next-arrow" aria-label="Next Slide"><i class="bi bi-chevron-right"></i></button>
         </div>
         <div class="slider-dots">
             <?php foreach ($sliders_list as $i => $s): ?>
@@ -156,10 +156,11 @@ foreach ($sliders_list as $sl) {
     }
     .prev-arrow { left: 20px; }
     .next-arrow { right: 20px; }
-    @media (max-width: 768px) {
-        .slider-arrow { width: 35px; height: 35px; font-size: 1rem; }
-        .prev-arrow { left: 10px; }
-        .next-arrow { right: 10px; }
+    @media (max-width: 991.98px) {
+        .slider-arrows,
+        .slider-arrow {
+            display: none !important;
+        }
     }
 
     <?php foreach ($sliders_list as $idx => $s): ?>

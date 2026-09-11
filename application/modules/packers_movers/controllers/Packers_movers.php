@@ -96,6 +96,15 @@ class Packers_movers extends MX_Controller
         $lon = '';
         $custom_content = '';
 
+        $hero_image = '';
+        $show_hero_image = 1;
+        $show_shifting_process = 1;
+        $show_achievements = 1;
+        $show_services = 1;
+        $show_reviews = 1;
+        $show_videos = 1;
+        $show_faqs = 1;
+
         try {
             $admin_db = $this->load->database('admin_hub', TRUE);
             if ($admin_db && $admin_db->conn_id) {
@@ -104,6 +113,16 @@ class Packers_movers extends MX_Controller
                     $lat = $c->latitude;
                     $lon = $c->longitude;
                     $custom_content = $c->custom_content;
+                    if (!empty($c->hero_image)) {
+                        $hero_image = base_url($c->hero_image);
+                    }
+                    if (isset($c->show_hero_image)) $show_hero_image = $c->show_hero_image;
+                    if (isset($c->show_shifting_process)) $show_shifting_process = $c->show_shifting_process;
+                    if (isset($c->show_achievements)) $show_achievements = $c->show_achievements;
+                    if (isset($c->show_services)) $show_services = $c->show_services;
+                    if (isset($c->show_reviews)) $show_reviews = $c->show_reviews;
+                    if (isset($c->show_videos)) $show_videos = $c->show_videos;
+                    if (isset($c->show_faqs)) $show_faqs = $c->show_faqs;
                 }
             }
         } catch (\Exception $e) {
@@ -120,6 +139,14 @@ class Packers_movers extends MX_Controller
             "lat" => $lat,
             "lon" => $lon,
             "custom_content" => $custom_content,
+            "hero_image" => $hero_image,
+            "show_hero_image" => $show_hero_image,
+            "show_shifting_process" => $show_shifting_process,
+            "show_achievements" => $show_achievements,
+            "show_services" => $show_services,
+            "show_reviews" => $show_reviews,
+            "show_videos" => $show_videos,
+            "show_faqs" => $show_faqs,
             "faqs" => $faqs,
             'img' => base_url('assets') . "/images/logo/logo.jpg",
             "title" => $seo['title'],

@@ -1,4 +1,22 @@
 <style>
+/* SweetAlert top z-index override to ensure modals appear above fixed footer */
+.swal2-container.swal2-top-zindex {
+    z-index: 20000 !important;
+}
+.sleek-booking-confirmed-modal {
+    border-radius: 18px !important;
+    padding: 24px 28px !important;
+    max-width: 92vw !important;
+    max-height: 86vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25) !important;
+}
+@media (max-width: 576px) {
+    .sleek-booking-confirmed-modal {
+        padding: 18px 16px !important;
+    }
+}
+
 /* CSS Wizard design enhancements */
 .wizard-tabs-list .nav-link {
     background: #f8f9fa;
@@ -251,6 +269,25 @@ body {
 .floating-call, .whats-btn-simple, .floating-whats-btn, .whats-btn-simple-wrap {
     display: none !important;
 }
+
+/* Custom CSS for Booking Confirmed & Alert Modals */
+.swal2-container.swal2-top-zindex {
+    z-index: 20000 !important;
+}
+.sleek-booking-confirmed-modal {
+    border-radius: 18px !important;
+    padding: 24px 28px !important;
+    max-width: 92vw !important;
+    max-height: 86vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25) !important;
+}
+@media (max-width: 576px) {
+    .sleek-booking-confirmed-modal {
+        padding: 18px 16px !important;
+        border-radius: 14px !important;
+    }
+}
 </style>
 
 <!-- Breadcrumb Banner -->
@@ -314,9 +351,20 @@ body {
                       $eb_drop   = isset($edit_booking->drop_location) ? htmlspecialchars($edit_booking->drop_location) : '';
                       $eb_dist   = isset($edit_booking->total_distance) ? floatval($edit_booking->total_distance) : 10;
                       $eb_date   = !empty($edit_booking->shifting_date) ? date('Y-m-d', strtotime($edit_booking->shifting_date)) : '';
-                      // Use substr for time to avoid strtotime('HH:MM:SS') returning false on some PHP builds
-                      $eb_time   = !empty($edit_booking->shifting_time) ? substr($edit_booking->shifting_time, 0, 5) : '';
+                      $eb_time   = !empty($edit_booking->shifting_time) ? $edit_booking->shifting_time : '';
+                      $eb_time_12 = !empty($edit_booking->shifting_time) ? date('h:i A', strtotime($edit_booking->shifting_time)) : '';
                       $eb_phone  = !empty($edit_booking->phone_number) ? htmlspecialchars($edit_booking->phone_number) : (!empty($edit_booking->phone) ? htmlspecialchars($edit_booking->phone) : '');
+
+                      $time_options_12h = array(
+                          "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
+                          "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+                          "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
+                          "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
+                          "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM",
+                          "09:00 PM", "09:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
+                          "12:00 AM", "12:30 AM", "01:00 AM", "01:30 AM", "02:00 AM", "02:30 AM",
+                          "03:00 AM", "03:30 AM", "04:00 AM", "04:30 AM", "05:00 AM", "05:30 AM"
+                      );
                     ?>
                     <div class="wizard-step-panel card border-0 shadow-sm p-4 mb-4" id="step-panel-1" style="border-radius: 0; border-top: 4px solid #FC5D09;">
                         <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
@@ -365,8 +413,15 @@ body {
                             </div>
                             <div class="col-md-3 col-6">
                                 <label class="form-label fw-bold small text-muted">SHIFTING TIME <span class="text-danger">*</span></label>
-                                <input type="time" class="form-control" id="wizardShiftingTime" name="shifting_time" value="<?= $eb_time ?>" required style="border-radius: 0;">
+                                <select class="form-select" id="wizardShiftingTime" name="shifting_time" required style="border-radius: 0;">
+                                    <option value="" <?= empty($eb_time_12) ? 'selected' : '' ?>>Select Time Slot (12-Hour)</option>
+                                    <?php foreach ($time_options_12h as $t_opt): ?>
+                                        <option value="<?= $t_opt ?>" <?= (strtoupper($eb_time_12) === strtoupper($t_opt)) ? 'selected' : '' ?>><?= $t_opt ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="form-text small text-muted">Min. 2 hrs advance booking</div>
                             </div>
+
                             
                             <!-- Flooring details (Elevator surcharges) -->
                             <div class="col-12"><hr class="text-muted opacity-25"></div>
@@ -860,8 +915,19 @@ body {
 <!-- OTP Login Modal is loaded globally via footer -->
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkG4TBQoURnRXy7szzEQP2LqvlEEVfYDM&libraries=places"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
+<?php
+$CI =& get_instance();
+$CI->load->model('contacts/contacts_mdl');
+$loc_settings_ob = isset($loc_settings) ? $loc_settings : $CI->contacts_mdl->get_location_service_settings();
+$allowed_cities_str_ob = isset($loc_settings_ob['allowed_pickup_cities']) ? $loc_settings_ob['allowed_pickup_cities'] : 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad';
+$max_distance_km_ob = isset($loc_settings_ob['max_relocation_distance_km']) ? floatval($loc_settings_ob['max_relocation_distance_km']) : 300;
+?>
+window.allowedPickupCitiesStr = <?php echo json_encode($allowed_cities_str_ob); ?>;
+window.maxRelocationDistanceKm = <?php echo floatval($max_distance_km_ob); ?>;
+
 // Global dynamic data loaded from controller
 const shiftingCategories = <?= json_encode($categories ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 const addonCategoryPrices = <?= json_encode($addon_category_prices ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
@@ -1020,7 +1086,7 @@ $(function() {
     updateProgressTracker(1);
 
     // Set min date for shifting date input if not editing
-    const today = new Date().toISOString().split('T')[0];
+    const today = (function() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
     const di = document.getElementById('wizardShiftingDate');
     if (di && !editBookingData) { 
         di.setAttribute('min', today); 
@@ -1388,43 +1454,52 @@ function validateBeforeStep(stepNum) {
             let dVal = $('#wizardDrop').val() ? $('#wizardDrop').val().trim() : '';
 
             if (!pVal || !dVal) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Incomplete Locations!',
-                    text: 'Please enter pickup and drop locations to proceed.',
-                    confirmButtonColor: '#FC5D09'
-                });
+                showSleekNoticeModal(
+                    'Incomplete Locations',
+                    'Please enter both <b>Pickup</b> and <b>Drop</b> locations to proceed.',
+                    'Enter Locations',
+                    'location'
+                );
+                if (!pVal) $('#wizardPickup').focus(); else $('#wizardDrop').focus();
                 return false;
             }
 
-            // ─── Validate that locations were selected from Google suggestions ───
+            // ─── Must select location from suggestion dropdown list ───
             if (!_isPickupValidWizard) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Pickup Location!',
-                    text: 'Please select a valid pickup location from the suggestions list, not manually typed text.',
-                    confirmButtonColor: '#FC5D09'
-                });
+                showSleekNoticeModal(
+                    'Select Pickup from Suggestions',
+                    'Please select your pickup location from the <b>suggestions dropdown list</b>, rather than typing manually.',
+                    'Select Suggestion',
+                    'location'
+                );
                 $('#wizardPickup').focus();
                 return false;
             }
             if (!_isDropValidWizard) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Drop Location!',
-                    text: 'Please select a valid drop location from the suggestions list, not manually typed text.',
-                    confirmButtonColor: '#FC5D09'
-                });
+                showSleekNoticeModal(
+                    'Select Drop from Suggestions',
+                    'Please select your drop location from the <b>suggestions dropdown list</b>, rather than typing manually.',
+                    'Select Suggestion',
+                    'location'
+                );
                 $('#wizardDrop').focus();
                 return false;
+            }
+
+            // ─── Validate Delhi NCR Pickup & 300 KM Distance Limits ───
+            if (typeof checkLocationAndDistanceRestrictions === 'function') {
+                if (!checkLocationAndDistanceRestrictions()) {
+                    return false;
+                }
             }
             // ────────────────────────────────────────────────────────
         }
 
         // Ensure shifting date is set (auto-fill today if blank)
         let dtVal = $('#wizardShiftingDate').val() ? $('#wizardShiftingDate').val().trim() : '';
+        const todayStr = (function() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
         if (!dtVal) {
-            const todayStr = new Date().toISOString().split('T')[0];
+            dtVal = todayStr;
             $('#wizardShiftingDate').val(todayStr);
         }
 
@@ -1437,7 +1512,38 @@ function validateBeforeStep(stepNum) {
                 text: 'Please select shifting time to proceed.',
                 confirmButtonColor: '#FC5D09'
             });
+            $('#wizardShiftingTime').focus();
             return false;
+        }
+
+        // Strict 2-hour minimum advance booking check for today
+        if (dtVal === todayStr) {
+            let selMin = parseTimeToMinutes(tmVal);
+            let now = new Date();
+            let nowMin = now.getHours() * 60 + now.getMinutes();
+            let minAllowedMin = nowMin + 120; // +2 hours
+
+            if (selMin >= 0 && selMin < minAllowedMin) {
+                let currentStr = formatMinutesTo12Hour(nowMin);
+                let earliestStr = minAllowedMin >= 1440 
+                    ? 'No time slots left today. Please select tomorrow\'s date.' 
+                    : formatMinutesTo12Hour(minAllowedMin);
+
+                showSleekNoticeModal(
+                    'Advance Booking (2 Hrs Minimum)',
+                    'Orders must be scheduled at least <b>2 hours</b> in advance.<br><br>' +
+                    '• Current Time: <b>' + currentStr + '</b><br>' +
+                    '• Earliest Allowed Today: <b>' + earliestStr + '</b>',
+                    'Select Valid Time',
+                    'time'
+                );
+                $('#wizardShiftingTime').val('');
+                if (typeof filterSelectTimeOptions === 'function') {
+                    filterSelectTimeOptions('wizardShiftingDate', 'wizardShiftingTime');
+                }
+                $('#wizardShiftingTime').focus();
+                return false;
+            }
         }
     }
     // Step 2 (Items) must have at least 1 item selected before going to step 3+
@@ -1681,8 +1787,125 @@ function setupWebLocationAutocomplete(inputId, suggestionsId, latInputId, lonInp
     });
 }
 
-setupWebLocationAutocomplete('wizardPickup', 'web_pickup_suggestions', 'web_pickup_lat', 'web_pickup_lon', function() { _isPickupValidWizard = true; });
-setupWebLocationAutocomplete('wizardDrop', 'web_drop_suggestions', 'web_drop_lat', 'web_drop_lon', function() { _isDropValidWizard = true; });
+function isAllowedPickupLocation(addressStr) {
+    if (!addressStr) return false;
+    var str = addressStr.toLowerCase();
+    var rawCities = window.allowedPickupCitiesStr || 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad';
+    var allowedKeywords = rawCities.split(',').map(function(c) { return c.trim().toLowerCase(); }).filter(function(c) { return c.length > 0; });
+    
+    var extraKeywords = [];
+    allowedKeywords.forEach(function(kw) {
+        if (kw === 'gurugram' || kw === 'gurgaon') {
+            extraKeywords.push('gurugram', 'gurgaon');
+        } else if (kw === 'delhi' || kw === 'new delhi') {
+            extraKeywords.push('delhi', 'new delhi', 'ncr');
+        } else if (kw === 'noida' || kw === 'greater noida') {
+            extraKeywords.push('noida', 'greater noida', 'gautam buddh', 'gautam budh');
+        }
+    });
+    allowedKeywords = allowedKeywords.concat(extraKeywords);
+
+    for (var i = 0; i < allowedKeywords.length; i++) {
+        if (allowedKeywords[i] !== '' && str.indexOf(allowedKeywords[i]) !== -1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function showSleekNoticeModal(title, htmlMessage, btnLabel, iconType) {
+    var iconClass = 'bi-geo-alt-fill';
+    var iconBg = '#fff1f0';
+    var iconBorder = '#ffa39e';
+    var iconColor = '#e02424';
+
+    if (iconType === 'distance') {
+        iconClass = 'bi-pin-map-fill';
+        iconBg = '#fff7ed';
+        iconBorder = '#ffedd5';
+        iconColor = '#ea580c';
+    } else if (iconType === 'time') {
+        iconClass = 'bi-clock-history';
+        iconBg = '#eff6ff';
+        iconBorder = '#dbeafe';
+        iconColor = '#2563eb';
+    }
+
+    Swal.fire({
+        width: '380px',
+        padding: '1.25rem 1rem',
+        html:
+            '<div style="text-align:center;">' +
+            '  <div style="width:46px;height:46px;background:' + iconBg + ';border:1.5px solid ' + iconBorder + ';border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 10px;">' +
+            '    <i class="bi ' + iconClass + '" style="color:' + iconColor + ';font-size:22px;"></i>' +
+            '  </div>' +
+            '  <h5 style="font-weight:700;color:#1e293b;font-size:1.02rem;margin-bottom:8px;line-height:1.3;">' + title + '</h5>' +
+            '  <div style="font-size:0.84rem;color:#475569;line-height:1.45;margin-bottom:14px;text-align:left;background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #f1f5f9;">' + htmlMessage + '</div>' +
+            '  <button id="sleekSwalBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:0.86rem;cursor:pointer;width:100%;box-shadow:0 4px 12px rgba(252,93,9,0.25);">' +
+            (btnLabel || 'OK, Got It') +
+            '  </button>' +
+            '</div>',
+        showConfirmButton: false,
+        allowOutsideClick: true,
+        customClass: {
+            container: 'swal2-top-zindex',
+            popup: 'sleek-swal-compact'
+        },
+        didOpen: function() {
+            var btn = document.getElementById('sleekSwalBtn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    Swal.close();
+                });
+            }
+        }
+    });
+}
+
+function checkLocationAndDistanceRestrictions() {
+    var pVal = $('#wizardPickup').val() ? $('#wizardPickup').val().trim() : '';
+    var dVal = $('#wizardDrop').val() ? $('#wizardDrop').val().trim() : '';
+    var distVal = parseFloat($('#distanceRange').val()) || 0;
+    var maxKm = window.maxRelocationDistanceKm || 300;
+    var noticeCities = window.allowedPickupCitiesStr || 'Delhi, Noida, Greater Noida, Gurugram, Ghaziabad, Faridabad';
+
+    // 1. Check Pickup Location
+    if (pVal && !isAllowedPickupLocation(pVal)) {
+        showSleekNoticeModal(
+            'Pickup Service Unavailable',
+            'Currently, our pickup relocation services operate exclusively from <b>' + noticeCities + '</b>.<br><br>We do not offer pickup services from your selected location.',
+            'Change Pickup Location',
+            'location'
+        );
+        $('#wizardPickup').val('');
+        _isPickupValidWizard = false;
+        $('#wizardPickup').focus();
+        return false;
+    }
+
+    // 2. Check Distance
+    if (pVal && dVal && distVal > maxKm) {
+        showSleekNoticeModal(
+            'Distance Exceeds Limit (Max ' + maxKm + ' KM)',
+            'We currently provide relocation services up to <b>' + maxKm + ' KM</b> from pickup location.<br><br>Your route is <b>' + distVal + ' KM</b>, which exceeds our ' + maxKm + ' KM limit.',
+            'Change Drop Location',
+            'distance'
+        );
+        $('#wizardDrop').focus();
+        return false;
+    }
+
+    return true;
+}
+
+setupWebLocationAutocomplete('wizardPickup', 'web_pickup_suggestions', 'web_pickup_lat', 'web_pickup_lon', function() { 
+    _isPickupValidWizard = true; 
+    checkLocationAndDistanceRestrictions();
+});
+setupWebLocationAutocomplete('wizardDrop', 'web_drop_suggestions', 'web_drop_lat', 'web_drop_lon', function() { 
+    _isDropValidWizard = true; 
+    calculateWebRealDistanceKM();
+});
 
 function calculateWebRealDistanceKM() {
     const pLat = parseFloat($('#web_pickup_lat').val());
@@ -1698,6 +1921,7 @@ function calculateWebRealDistanceKM() {
                 $('#distanceRange').val(km);
                 $('#distanceDisplay').val(km + ' KM');
                 calculateLiveEstimate();
+                checkLocationAndDistanceRestrictions();
             } else {
                 fallbackWebHaversine(pLat, pLon, dLat, dLon);
             }
@@ -1722,6 +1946,7 @@ function fallbackWebHaversine(lat1, lon1, lat2, lon2) {
     $('#distanceRange').val(km);
     $('#distanceDisplay').val(km + ' KM');
     calculateLiveEstimate();
+    checkLocationAndDistanceRestrictions();
 }
 
 $('#distanceRange').on('input change', function() {
@@ -2529,6 +2754,19 @@ function showToast(message, type = 'success') {
 }
 
 function openRegistrationPayment(bookingId, fee) {
+    if (typeof Razorpay === 'undefined') {
+        showToast('Loading Razorpay payment gateway...', 'info');
+        var script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = function() {
+            openRegistrationPayment(bookingId, fee);
+        };
+        script.onerror = function() {
+            showToast('Failed to load Razorpay payment gateway. Please check your internet connection.', 'error');
+        };
+        document.head.appendChild(script);
+        return;
+    }
     const options = {
         "key": "<?= defined('RAZORPAY_KEY_ID') ? RAZORPAY_KEY_ID : 'rzp_live_TFidvL3276AhNp' ?>",
         "amount": Math.round(fee * 100), // in paise
@@ -2716,30 +2954,36 @@ function updateRegistrationPaymentStatus(bookingId, status, paymentId, orderId) 
                 var pAmount  = parseFloat(window.lastPaidRegFee || 500).toFixed(2);
 
                 Swal.fire({
+                    width: '540px',
+                    customClass: {
+                        container: 'swal2-top-zindex',
+                        popup: 'sleek-booking-confirmed-modal'
+                    },
                     html:
-                        '<div style="text-align:center; padding:2px;">'
-                        + '<div style="position:relative; width:48px; height:48px; margin:0 auto 8px;">'
-                        + '<svg style="position:absolute; top:-8px; left:-8px; width:64px; height:64px; pointer-events:none;" viewBox="0 0 100 100">'
+                        '<div style="text-align:center;">'
+                        + '<div style="position:relative; width:56px; height:56px; margin:0 auto 12px;">'
+                        + '<svg style="position:absolute; top:-10px; left:-10px; width:76px; height:76px; pointer-events:none;" viewBox="0 0 100 100">'
                         + '<circle cx="20" cy="18" r="3" fill="#e53e3e" opacity="0.6"/><circle cx="82" cy="22" r="3" fill="#dd6b20" opacity="0.6"/><circle cx="15" cy="78" r="3.5" fill="#319795" opacity="0.6"/><circle cx="85" cy="80" r="3.5" fill="#38a169" opacity="0.6"/><polygon points="50,4 53,10 47,10" fill="#38a169" opacity="0.7"/><polygon points="8,50 14,53 14,47" fill="#dd6b20" opacity="0.7"/><polygon points="92,48 98,51 98,45" fill="#319795" opacity="0.7"/>'
                         + '</svg>'
-                        + '<div style="width:48px; height:48px; background:linear-gradient(135deg,#38ef7d,#11998e); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(56,239,125,0.35); position:relative; z-index:1;"><div style="width:28px; height:28px; border:2px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="bi bi-check-lg" style="color:#ffffff; font-size:16px;"></i></div></div>'
+                        + '<div style="width:56px; height:56px; background:linear-gradient(135deg,#38ef7d,#11998e); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(56,239,125,0.35); position:relative; z-index:1;"><div style="width:32px; height:32px; border:2.5px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="bi bi-check-lg" style="color:#ffffff; font-size:20px; font-weight:800;"></i></div></div>'
                         + '</div>'
-                        + '<h3 style="font-weight:800; color:#1a1a2e; margin:0 0 3px; font-size:1.05rem; letter-spacing:-0.3px;">Booking Confirmed!</h3><div style="width:25px; height:2px; background:#FC5D09; border-radius:2px; margin:0 auto 8px;"></div>'
-                        + '<p style="font-size:0.75rem; color:#4a5568; line-height:1.35; margin-bottom:8px; padding:0 2px;">We have successfully received your token amount and your booking is confirmed.</p>'
-                        + '<div style="background:linear-gradient(135deg,#f0fff4,#e6fffa); border:1px solid #c6f6d5; border-radius:10px; padding:8px 10px; margin-bottom:10px; display:flex; align-items:center; gap:8px; text-align:left;"><div style="width:30px; height:30px; background:#ffffff; border:1.5px solid #38a169; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="bi bi-calendar-check" style="color:#38a169; font-size:15px;"></i></div><div style="font-size:0.75rem; color:#2d3748; line-height:1.35; font-weight:500;">We are preparing for your order and will keep you updated at every step.</div></div>'
-                        + '<div style="background:#ffffff; border:1px solid #edf2f7; border-radius:12px; padding:10px 12px; margin-bottom:12px; text-align:left; box-shadow:0 2px 8px rgba(0,0,0,0.03);">'
-                        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;font-size:0.76rem;gap:6px;"><div style="display:flex;align-items:center;gap:5px;color:#718096;flex-shrink:0;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09;font-size:12px;"></i><span>Pickup:</span></div><div style="color:#1a1a2e;font-weight:700;text-align:right;word-break:break-word;max-width:65%;font-size:0.76rem;">' + pAddress + '</div></div>'
-                        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px;font-size:0.76rem;gap:6px;"><div style="display:flex;align-items:center;gap:5px;color:#718096;flex-shrink:0;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09;font-size:12px;"></i><span>Drop:</span></div><div style="color:#1a1a2e;font-weight:700;text-align:right;word-break:break-word;max-width:65%;font-size:0.76rem;">' + dAddress + '</div></div>'
-                        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:0.76rem;gap:6px;"><div style="display:flex;align-items:center;gap:5px;color:#718096;flex-shrink:0;"><i class="bi bi-calendar-event-fill" style="color:#FC5D09;font-size:12px;"></i><span>Moving Date:</span></div><div style="color:#1a1a2e;font-weight:700;font-size:0.76rem;">' + mDate + '</div></div><div style="border-top:1px dashed #e2e8f0;margin:7px 0;"></div>'
-                        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:0.76rem;gap:6px;"><div style="display:flex;align-items:center;gap:5px;color:#718096;flex-shrink:0;"><i class="bi bi-shield-check" style="color:#38a169;font-size:13px;"></i><span>Token Paid:</span></div><div style="color:#276749;font-weight:800;font-size:0.76rem;">₹' + pAmount + ' (Verified)</div></div>'
-                        + '<div style="background:#fff5ed;border:1px solid #fed7d7;border-radius:8px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:7px;"><div style="width:24px;height:24px;background:#FC5D09;border-radius:5px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-wallet2" style="color:#ffffff;font-size:11px;"></i></div><span style="font-weight:700;color:#2d3748;font-size:0.8rem;">Total Paid</span></div><div style="color:#FC5D09;font-weight:800;font-size:0.95rem;">₹' + pAmount + '</div></div>'
+                        + '<h3 style="font-weight:800; color:#1a1a2e; margin:0 0 4px; font-size:1.3rem; letter-spacing:-0.4px;">Booking Confirmed!</h3>'
+                        + '<div style="width:36px; height:3px; background:#FC5D09; border-radius:3px; margin:0 auto 10px;"></div>'
+                        + '<p style="font-size:0.85rem; color:#4a5568; line-height:1.45; margin-bottom:14px; padding:0 10px;">We have successfully received your token amount and your booking is confirmed.</p>'
+                        + '<div style="background:linear-gradient(135deg,#f0fff4,#e6fffa); border:1px solid #c6f6d5; border-radius:12px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:10px; text-align:left;"><div style="width:34px; height:34px; background:#ffffff; border:1.5px solid #38a169; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="bi bi-calendar-check" style="color:#38a169; font-size:17px;"></i></div><div style="font-size:0.82rem; color:#2d3748; line-height:1.4; font-weight:600;">We are preparing for your order and will keep you updated at every step.</div></div>'
+                        + '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; margin-bottom:18px; text-align:left;">'
+                        + '<div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed #e2e8f0;"><div style="width:28px; height:28px; background:#fff5ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09; font-size:14px;"></i></div><div style="flex-grow:1;"><div style="font-size:0.7rem; color:#718096; text-transform:uppercase; font-weight:700; letter-spacing:0.4px;">Pickup Location</div><div style="font-size:0.84rem; color:#1a202c; font-weight:700; word-break:break-word; margin-top:1px;">' + pAddress + '</div></div></div>'
+                        + '<div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed #e2e8f0;"><div style="width:28px; height:28px; background:#fff5ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09; font-size:14px;"></i></div><div style="flex-grow:1;"><div style="font-size:0.7rem; color:#718096; text-transform:uppercase; font-weight:700; letter-spacing:0.4px;">Drop Location</div><div style="font-size:0.84rem; color:#1a202c; font-weight:700; word-break:break-word; margin-top:1px;">' + dAddress + '</div></div></div>'
+                        + '<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">'
+                        + '<div style="flex:1; min-width:140px; background:#ffffff; border:1px solid #edf2f7; border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px;"><i class="bi bi-calendar-event-fill" style="color:#FC5D09; font-size:16px;"></i><div><div style="font-size:0.68rem; color:#718096; font-weight:700; text-transform:uppercase;">Moving Date</div><div style="font-size:0.82rem; color:#1a202c; font-weight:700;">' + mDate + '</div></div></div>'
+                        + '<div style="flex:1; min-width:140px; background:#ffffff; border:1px solid #edf2f7; border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px;"><i class="bi bi-shield-check" style="color:#38a169; font-size:18px;"></i><div><div style="font-size:0.68rem; color:#718096; font-weight:700; text-transform:uppercase;">Token Paid</div><div style="font-size:0.82rem; color:#276749; font-weight:800;">₹' + pAmount + ' <span style="font-size:0.68rem; font-weight:600; color:#38a169;">(Verified)</span></div></div></div>'
                         + '</div>'
-                        + '<button id="swalConfirmOkBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b);color:#ffffff;border:none;border-radius:8px;padding:8px 0;margin-bottom:8px;font-weight:700;font-size:0.82rem;cursor:pointer;box-shadow:0 4px 12px rgba(252, 93, 9,0.3);width:100%;display:flex;align-items:center;justify-content:center;gap:5px;">Go to Homepage <i class="bi bi-arrow-right"></i></button>'
+                        + '<div style="background:linear-gradient(135deg, #fff5ed, #ffede0); border:1.5px solid #ffcca8; border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between;"><div style="display:flex; align-items:center; gap:8px;"><div style="width:28px; height:28px; background:#FC5D09; border-radius:6px; display:flex; align-items:center; justify-content:center;"><i class="bi bi-wallet2" style="color:#ffffff; font-size:13px;"></i></div><span style="font-weight:700; color:#2d3748; font-size:0.88rem;">Total Paid</span></div><div style="color:#FC5D09; font-weight:850; font-size:1.1rem;">₹' + pAmount + '</div></div>'
+                        + '</div>'
+                        + '<button id="swalConfirmOkBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b); color:#ffffff; border:none; border-radius:10px; padding:12px 0; font-weight:700; font-size:0.92rem; cursor:pointer; box-shadow:0 6px 18px rgba(252, 93, 9,0.35); width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">Go to Homepage <i class="bi bi-arrow-right" style="font-size:1rem;"></i></button>'
                         + '</div>',
                     showConfirmButton: false,
                     allowOutsideClick: false,
-                    width: '300px',
-                    padding: '12px 14px 20px',
                     didOpen: () => {
                         document.getElementById('swalConfirmOkBtn').addEventListener('click', () => {
                             Swal.close();
@@ -2862,3 +3106,133 @@ window.setLoggedIn = function (name) {
     }
 };
 </script>
+
+<script>
+// Helper: Parse any time string (12-hr AM/PM or 24-hr) to total minutes from midnight
+function parseTimeToMinutes(timeStr) {
+    if (!timeStr) return -1;
+    timeStr = String(timeStr).trim();
+    var ampmMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampmMatch) {
+        var h = parseInt(ampmMatch[1], 10);
+        var m = parseInt(ampmMatch[2], 10);
+        var p = ampmMatch[3].toUpperCase();
+        if (p === 'PM' && h < 12) h += 12;
+        if (p === 'AM' && h === 12) h = 0;
+        return h * 60 + m;
+    }
+    var hr24Match = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+    if (hr24Match) {
+        var h24 = parseInt(hr24Match[1], 10);
+        var m24 = parseInt(hr24Match[2], 10);
+        return h24 * 60 + m24;
+    }
+    return -1;
+}
+
+// Helper: Format total minutes from midnight into 12-hour AM/PM string
+function formatMinutesTo12Hour(totalMin) {
+    if (totalMin < 0) return '';
+    if (totalMin >= 1440) {
+        var remMin = totalMin - 1440;
+        var h = Math.floor(remMin / 60);
+        var m = remMin % 60;
+        var period = h >= 12 ? 'PM' : 'AM';
+        var h12 = h % 12; if (h12 === 0) h12 = 12;
+        return String(h12).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ' ' + period + ' (Tomorrow)';
+    } else {
+        var h = Math.floor(totalMin / 60);
+        var m = totalMin % 60;
+        var period = h >= 12 ? 'PM' : 'AM';
+        var h12 = h % 12; if (h12 === 0) h12 = 12;
+        return String(h12).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ' ' + period;
+    }
+}
+
+function getLocalTodayDateStr() {
+    var d = new Date();
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+}
+
+// Helper: Filter 12-hour time options in dropdown based on date
+function filterSelectTimeOptions(dateElemId, timeElemId) {
+    var dateVal = $('#' + dateElemId).val();
+    var timeSelect = document.getElementById(timeElemId);
+    if (!timeSelect) return;
+
+    var todayStr = getLocalTodayDateStr();
+    var isToday = (!dateVal || dateVal === todayStr);
+
+    var now = new Date();
+    var minAllowedMin = isToday ? (now.getHours() * 60 + now.getMinutes() + 120) : 0;
+
+    var options = timeSelect.options;
+    for (var i = 0; i < options.length; i++) {
+        var opt = options[i];
+        if (!opt.value) continue;
+        var optMin = parseTimeToMinutes(opt.value);
+        if (isToday && optMin >= 0 && optMin < minAllowedMin) {
+            opt.disabled = true;
+            var cleanText = opt.value;
+            if (!opt.text.includes('(Unavailable)')) {
+                opt.text = cleanText + ' (Unavailable - Min 2 hrs)';
+            }
+        } else {
+            opt.disabled = false;
+            opt.text = opt.value;
+        }
+    }
+
+    if (timeSelect.selectedIndex >= 0 && timeSelect.options[timeSelect.selectedIndex].disabled) {
+        timeSelect.value = '';
+    }
+}
+
+$(function () {
+    filterSelectTimeOptions('wizardShiftingDate', 'wizardShiftingTime');
+
+    $('#wizardShiftingDate').on('change', function () {
+        filterSelectTimeOptions('wizardShiftingDate', 'wizardShiftingTime');
+        $('#wizardShiftingTime').trigger('change');
+    });
+
+    $('#wizardShiftingTime').on('change', function() {
+        var dateVal = $('#wizardShiftingDate').val() ? $('#wizardShiftingDate').val().trim() : '';
+        var timeVal = $(this).val() ? $(this).val().trim() : '';
+        var todayStr = getLocalTodayDateStr();
+
+        if ((!dateVal || dateVal === todayStr) && timeVal) {
+            var selMin = parseTimeToMinutes(timeVal);
+            var now = new Date();
+            var nowMin = now.getHours() * 60 + now.getMinutes();
+            var minAllowedMin = nowMin + 120; // +2 hours
+
+            if (selMin >= 0 && selMin < minAllowedMin) {
+                var currentStr = formatMinutesTo12Hour(nowMin);
+                var earliestStr = minAllowedMin >= 1440 
+                    ? 'No time slots left today. Please select tomorrow\'s date.' 
+                    : formatMinutesTo12Hour(minAllowedMin);
+
+                showSleekNoticeModal(
+                    'Advance Booking (2 Hrs Minimum)',
+                    'Orders must be scheduled at least <b>2 hours</b> in advance.<br><br>' +
+                    '• Current Time: <b>' + currentStr + '</b><br>' +
+                    '• Earliest Allowed Today: <b>' + earliestStr + '</b>',
+                    'Select Valid Time',
+                    'time'
+                );
+                $(this).val('');
+                filterSelectTimeOptions('wizardShiftingDate', 'wizardShiftingTime');
+            }
+        }
+    });
+
+    setInterval(function () {
+        filterSelectTimeOptions('wizardShiftingDate', 'wizardShiftingTime');
+    }, 60000);
+});
+</script>
+

@@ -11,7 +11,7 @@
 
 /* ─── Global Brand Color Overrides (#FC5D09) ─── */
 .text-danger,
-i.text-danger, 
+i.text-danger,
 span.text-danger,
 a.text-danger,
 h1.text-danger,
@@ -77,7 +77,8 @@ div.text-danger,
   color: #FC5D09 !important;
 }
 
-html, body {
+html,
+body {
   margin: 0 !important;
   padding: 0 !important;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -447,20 +448,25 @@ footer {
   background-color: #FC5D09;
   color: #fff;
   border: none;
-  padding: 12px 30px;
+  padding: 8px 16px;
+  font-size: 13px;
   font-weight: 600;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
   display: inline-block;
+  white-space: nowrap;
+  line-height: 1.4;
 }
 
 .quote-btn:hover {
   background-color: #DD3802;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(252, 93, 9, 0.35);
+  color: #fff;
 }
+
 
 .hamburger-btn {
   cursor: pointer;
@@ -690,8 +696,8 @@ footer {
   }
 
   .quote-btn {
-    padding: 10px 20px;
-    font-size: 14px;
+    padding: 7px 13px;
+    font-size: 12px;
   }
 
   .cards-slid {
@@ -844,4 +850,16 @@ button {
 
 .swal2-timer-progress-bar-container {
   border-radius: 0 !important;
+}
+
+/* ─── Compact Sleek SweetAlert Popup ───────────────────────────────────────── */
+.sleek-swal-compact {
+  border-radius: 16px !important;
+  padding: 20px 18px 18px !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25) !important;
+  max-width: 390px !important;
+}
+.sleek-swal-compact .swal2-html-container {
+  margin: 0 !important;
+  padding: 0 !important;
 }

@@ -13,7 +13,7 @@
     </nav>
   </div>
 </section>
-<section class="container py-5">
+<section class="container py-5" style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
   <div class="row">
     <?php $this->view('contacts/pageform.php'); ?>
     <div class="col-md-6 d-flex flex-column justify-content-center">
@@ -65,10 +65,17 @@
 </section>
 
 <style>
-    .breadcrumb-section{
-        background: linear-gradient(90deg, #FC5D09, #DD3802);
+    /* About page typography — matches site-wide font stack */
+    .about-content h2,
+    .about-content h3,
+    .about-content p,
+    .about-content b,
+    .about-content span {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
     }
     .color{
       color:#FC5D09;
     }
 </style>
+
+

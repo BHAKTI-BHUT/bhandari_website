@@ -49,10 +49,12 @@ class Contacts_mdl extends CI_Model
 
     private function get_email_settings()
     {
+        // Default: send notification to the SMTP sender's inbox itself
+        $smtp_user = $this->config['smtp_user'] ?: 'info@bhandaripackersandmovers.in';
         $settings = array(
-            'to_email' => 'info@bhandaripackersandmovers.in',
-            'from_email' => $this->config['smtp_user'] ?: 'info@bhandaripackersandmovers.in',
-            'from_name' => 'Packers and Movers'
+            'to_email'   => $smtp_user,
+            'from_email' => $smtp_user,
+            'from_name'  => 'Bhandari Packers and Movers'
         );
 
         try {
@@ -71,12 +73,54 @@ class Contacts_mdl extends CI_Model
                     $settings['from_email'] = $from_email_setting->value;
                 }
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            log_message('error', 'get_email_settings error: ' . $e->getMessage());
+        }
 
         return $settings;
     }
 
-    public function send_mail($message)
+    public function get_location_service_settings()
+    {
+        $settings = array(
+            'allowed_pickup_cities' => 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad, Sonipat, Sonepat, Jhajjar, Rohtak, Bahadurgarh, Manesar, Ballabhgarh, Meerut, Gautam Buddha Nagar, New Delhi',
+            'max_relocation_distance_km' => 300
+        );
+
+        try {
+            $admin_db = $this->load->database('admin_hub', TRUE);
+            if ($admin_db && $admin_db->conn_id) {
+                // Check settings table
+                if ($admin_db->table_exists('settings')) {
+                    $row_cities = $admin_db->where('key', 'allowed_pickup_cities')->get('settings')->row();
+                    if ($row_cities && !empty($row_cities->value)) {
+                        $settings['allowed_pickup_cities'] = $row_cities->value;
+                    }
+                    $row_dist = $admin_db->where('key', 'max_relocation_distance_km')->get('settings')->row();
+                    if ($row_dist && !empty($row_dist->value)) {
+                        $settings['max_relocation_distance_km'] = floatval($row_dist->value);
+                    }
+                }
+                // Check pricing_settings table
+                if ($admin_db->table_exists('pricing_settings')) {
+                    $row_cities2 = $admin_db->where('key', 'allowed_pickup_cities')->get('pricing_settings')->row();
+                    if ($row_cities2 && !empty($row_cities2->value)) {
+                        $settings['allowed_pickup_cities'] = $row_cities2->value;
+                    }
+                    $row_dist2 = $admin_db->where('key', 'max_relocation_distance_km')->get('pricing_settings')->row();
+                    if ($row_dist2 && !empty($row_dist2->value)) {
+                        $settings['max_relocation_distance_km'] = floatval($row_dist2->value);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+        }
+
+        return $settings;
+    }
+
+    public function send_mail($message, $subject = null)
     {
         $this->load->library('email', $this->config);
         $this->email->set_newline("\r\n");
@@ -85,7 +129,8 @@ class Contacts_mdl extends CI_Model
 
         $this->email->to($mail_settings['to_email']);
         $this->email->from($mail_settings['from_email'], $mail_settings['from_name']);
-        $this->email->subject('New Booking Received - ' . $mail_settings['from_name']);
+        $final_subject = !empty($subject) ? $subject : ('New Booking Received - ' . $mail_settings['from_name']);
+        $this->email->subject($final_subject);
         $this->email->message($message);
         if ($this->email->send()) {
             return true;
@@ -93,7 +138,7 @@ class Contacts_mdl extends CI_Model
             return 'Error: send_mail() - Email failed: ' . $this->email->print_debugger();
         }
     }
-
+    
     public function insert()
     {
         $this->load->library('email', $this->config);
@@ -216,17 +261,189 @@ class Contacts_mdl extends CI_Model
             log_message('error', 'Admin DB booking request insert failed: ' . $e->getMessage());
         }
 
-        // ─── 3. Email notification to admin ──────────────────────────────────
-        $verified_badge = ($is_verified == '1') ? "<span style='color:green;font-weight:bold;'>(Verified Mobile)</span>" : "<span style='color:orange;font-weight:bold;'>(Unverified / Skipped OTP)</span>";
-        $adminMessage = "<div style='padding:30px;background:#e6e6e6;font-size: 18px !important;'>"
-            . "Client's Name: <b>" . ($name ? htmlspecialchars($name) : 'Not specified') . "</b><br><br>"
-            . "Phone Number: <b><a href='tel:$phone'>$phone</a></b> $verified_badge<br><br>"
-            . "From: <b>" . htmlspecialchars($mfrom) . "</b><br><br>"
-            . "To: <b>" . htmlspecialchars($mto) . "</b><br><br>"
-            . "Moving Date: <b>" . htmlspecialchars($date) . "</b><br><br>"
-            . "Moving Time: <b>" . htmlspecialchars($shifting_time) . "</b></div>";
+        // ─── 3. Professional Responsive Email Notification to Admin ──────────
+        try {
+            $submission_time = date('D, d M Y \a\t h:i A');
+            $safe_name  = $name ? htmlspecialchars($name, ENT_QUOTES, 'UTF-8') : 'Not specified';
+            $safe_phone = htmlspecialchars($phone, ENT_QUOTES, 'UTF-8');
+            $safe_mfrom = !empty($mfrom) ? htmlspecialchars($mfrom, ENT_QUOTES, 'UTF-8') : 'Not specified';
+            $safe_mto   = !empty($mto)   ? htmlspecialchars($mto,   ENT_QUOTES, 'UTF-8') : 'Not specified';
+            $safe_date  = !empty($date)  ? htmlspecialchars(date('d M Y', strtotime($date)), ENT_QUOTES, 'UTF-8') : 'Not specified';
+            $safe_time  = !empty($shifting_time) ? htmlspecialchars($shifting_time, ENT_QUOTES, 'UTF-8') : 'Not specified';
 
-        // $this->send_mail($adminMessage); // Commented out mail sending on booking creation
+            $verified_badge_html = ($is_verified == '1')
+                ? "<span style='display:inline-block;background:#e6f4ea;color:#137333;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;'>&#10004; Verified Mobile</span>"
+                : "<span style='display:inline-block;background:#feefc3;color:#b06000;font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;'>&#9888; Lead Enquiry</span>";
+
+            $adminMessage = "
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>New Shifting Quote Request</title>
+</head>
+<body style='margin:0;padding:0;background-color:#f4f6f9;font-family:Segoe UI,Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9;'>
+    <tr>
+      <td align='center' style='padding:30px 15px;'>
+        <table width='600' cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);'>
+
+          <!-- Header -->
+          <tr>
+            <td style='background:linear-gradient(135deg,#FC5D09,#DD3802);padding:30px 35px;text-align:center;'>
+              <h1 style='margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;'>
+                &#128230; New Shifting Quote Request
+              </h1>
+              <p style='margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;'>
+                Bhandari Packers and Movers &mdash; Lead Enquiry Received
+              </p>
+            </td>
+          </tr>
+
+          <!-- Alert bar -->
+          <tr>
+            <td style='background:#fff8f5;border-left:4px solid #FC5D09;padding:12px 35px;'>
+              <table width='100%' cellpadding='0' cellspacing='0' border='0'>
+                <tr>
+                  <td>
+                    <p style='margin:0;font-size:13px;color:#555;'>
+                      &#128197; Received on: <strong style='color:#FC5D09;'>{$submission_time}</strong>
+                    </p>
+                  </td>
+                  <td align='right'>
+                    {$verified_badge_html}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style='padding:30px 35px;'>
+
+              <!-- Customer Details -->
+              <h2 style='margin:0 0 15px;font-size:15px;color:#0b2356;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #f0f0f0;padding-bottom:8px;'>
+                Customer Details
+              </h2>
+
+              <!-- Name -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:12px;'>
+                <tr>
+                  <td width='40' style='vertical-align:top;padding-top:2px;'>
+                    <div style='width:36px;height:36px;background:#fff3ee;border-radius:50%;text-align:center;line-height:36px;font-size:17px;'>&#128100;</div>
+                  </td>
+                  <td style='padding-left:12px;'>
+                    <p style='margin:0;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;'>Full Name</p>
+                    <p style='margin:3px 0 0;font-size:16px;font-weight:600;color:#1a1a2e;'>{$safe_name}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Phone -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:22px;'>
+                <tr>
+                  <td width='40' style='vertical-align:top;padding-top:2px;'>
+                    <div style='width:36px;height:36px;background:#fff3ee;border-radius:50%;text-align:center;line-height:36px;font-size:17px;'>&#128222;</div>
+                  </td>
+                  <td style='padding-left:12px;'>
+                    <p style='margin:0;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;'>Mobile Number</p>
+                    <p style='margin:3px 0 0;font-size:16px;font-weight:600;color:#1a1a2e;'>
+                      <a href='tel:{$safe_phone}' style='color:#FC5D09;text-decoration:none;'>{$safe_phone}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Relocation Details -->
+              <h2 style='margin:0 0 15px;font-size:15px;color:#0b2356;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #f0f0f0;padding-bottom:8px;'>
+                Relocation Details
+              </h2>
+
+              <div style='background:#f8f9fc;border-radius:8px;padding:20px;border-left:4px solid #FC5D09;margin-bottom:20px;'>
+                <!-- Pickup -->
+                <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:14px;'>
+                  <tr>
+                    <td width='30' style='vertical-align:top;padding-top:2px;'>
+                      <span style='font-size:18px;'>&#128205;</span>
+                    </td>
+                    <td>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Pickup Location (From)</p>
+                      <p style='margin:3px 0 0;font-size:15px;font-weight:600;color:#222;'>{$safe_mfrom}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Drop -->
+                <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:14px;'>
+                  <tr>
+                    <td width='30' style='vertical-align:top;padding-top:2px;'>
+                      <span style='font-size:18px;'>&#127919;</span>
+                    </td>
+                    <td>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Drop Location (To)</p>
+                      <p style='margin:3px 0 0;font-size:15px;font-weight:600;color:#222;'>{$safe_mto}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Date & Time Row -->
+                <table width='100%' cellpadding='0' cellspacing='0' border='0' style='border-top:1px dashed #e0e0e0;padding-top:12px;margin-top:10px;'>
+                  <tr>
+                    <td width='50%' style='vertical-align:top;'>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Shifting Date</p>
+                      <p style='margin:3px 0 0;font-size:14px;font-weight:600;color:#FC5D09;'>&#128197; {$safe_date}</p>
+                    </td>
+                    <td width='50%' style='vertical-align:top;'>
+                      <p style='margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.8px;'>Shifting Time Slot</p>
+                      <p style='margin:3px 0 0;font-size:14px;font-weight:600;color:#0b2356;'>&#9200; {$safe_time}</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- CTA Buttons -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-top:25px;'>
+                <tr>
+                  <td style='padding-bottom:10px;'>
+                    <a href='tel:{$safe_phone}'
+                       style='display:block;width:100%;box-sizing:border-box;background:#FC5D09;color:#ffffff;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;text-align:center;letter-spacing:0.3px;'>
+                      &#128222;&nbsp;&nbsp;Call Customer Now ({$safe_phone})
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style='background:#f8f9fc;border-top:1px solid #eee;padding:20px 35px;text-align:center;'>
+              <p style='margin:0;font-size:12px;color:#999;'>
+                This email was generated automatically by the shifting quote form on
+                <a href='https://bhandaripackersandmovers.in' style='color:#FC5D09;text-decoration:none;'>bhandaripackersandmovers.in</a>
+              </p>
+              <p style='margin:6px 0 0;font-size:12px;color:#bbb;'>
+                &copy; " . date('Y') . " Bhandari Packers and Movers. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
+
+            $this->send_mail($adminMessage, 'New Shifting Quote Request from ' . $safe_name);
+        } catch (\Throwable $e) {
+            log_message('error', 'Booking quote email send error: ' . $e->getMessage());
+        }
+
+        return true;
         return true;
     }
 
@@ -249,15 +466,22 @@ class Contacts_mdl extends CI_Model
         $this->load->library('email', $this->config);
         $this->email->set_newline("\r\n");
         $this->email->set_crlf("\r\n");
-        $name = $this->input->post('name');
+        $name  = $this->input->post('name');
         $email = $this->input->post('email');
         $phone = $this->input->post('phone');
-        $qry = $this->input->post('message');
+        $qry   = $this->input->post('message');
 
+        // ── 1. Save to local contacts table ──────────────────────────────────
         try {
-            $this->db->insert('contacts', array("name" => $name, "phone" => $phone, "message" => $qry, "email" => $email));
+            $this->db->insert('contacts', array(
+                "name"    => $name,
+                "phone"   => $phone,
+                "message" => $qry,
+                "email"   => $email
+            ));
         } catch (\Exception $e) {}
 
+        // ── 2. Save to admin contact_messages table ───────────────────────────
         try {
             $admin_db = $this->load->database('admin_hub', TRUE);
             if ($admin_db && $admin_db->table_exists('contact_messages')) {
@@ -275,27 +499,181 @@ class Contacts_mdl extends CI_Model
             log_message('error', 'Contact message admin_db insert error: ' . $e->getMessage());
         }
 
+        // ── 3. Send professional responsive HTML email ────────────────────────
         if (!empty($this->config['smtp_pass'])) {
             try {
-                $message = "<div style='padding:30px;background:#e6e6e6;font-size: 18px !important;'>Client's Query: <b><q>$qry</q></b><br><br>Client's Name:  <b>$name</b><br><br>Phone Number: <b><a href='tel:$phone'>$phone</a></b><br><br>Email: <b> $email</b></div>";
+                $submission_time = date('D, d M Y \a\t H:i A');
+                $safe_name    = htmlspecialchars($name,  ENT_QUOTES, 'UTF-8');
+                $safe_email   = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+                $safe_phone   = htmlspecialchars($phone, ENT_QUOTES, 'UTF-8');
+                $safe_message = nl2br(htmlspecialchars($qry, ENT_QUOTES, 'UTF-8'));
+
+                $message = "
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>New Contact Enquiry</title>
+</head>
+<body style='margin:0;padding:0;background-color:#f4f6f9;font-family:Segoe UI,Arial,sans-serif;'>
+  <table width='100%' cellpadding='0' cellspacing='0' border='0' style='background-color:#f4f6f9;'>
+    <tr>
+      <td align='center' style='padding:30px 15px;'>
+        <table width='600' cellpadding='0' cellspacing='0' border='0' style='max-width:600px;width:100%;background:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);'>
+
+          <!-- Header -->
+          <tr>
+            <td style='background:linear-gradient(135deg,#FC5D09,#DD3802);padding:30px 35px;text-align:center;'>
+              <h1 style='margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;'>
+                &#128233; New Contact Enquiry
+              </h1>
+              <p style='margin:8px 0 0;color:rgba(255,255,255,0.85);font-size:14px;'>
+                Bhandari Packers and Movers &mdash; Contact Form Submission
+              </p>
+            </td>
+          </tr>
+
+          <!-- Alert bar -->
+          <tr>
+            <td style='background:#fff8f5;border-left:4px solid #FC5D09;padding:12px 35px;'>
+              <p style='margin:0;font-size:13px;color:#555;'>
+                &#128197; Received on: <strong style='color:#FC5D09;'>{$submission_time}</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style='padding:30px 35px;'>
+              <h2 style='margin:0 0 20px;font-size:16px;color:#0b2356;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #f0f0f0;padding-bottom:10px;'>
+                Sender Details
+              </h2>
+
+              <!-- Name -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:15px;'>
+                <tr>
+                  <td width='40' style='vertical-align:top;padding-top:2px;'>
+                    <div style='width:36px;height:36px;background:#fff3ee;border-radius:50%;text-align:center;line-height:36px;font-size:17px;'>&#128100;</div>
+                  </td>
+                  <td style='padding-left:12px;'>
+                    <p style='margin:0;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;'>Full Name</p>
+                    <p style='margin:3px 0 0;font-size:16px;font-weight:600;color:#1a1a2e;'>{$safe_name}</p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Phone -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:15px;'>
+                <tr>
+                  <td width='40' style='vertical-align:top;padding-top:2px;'>
+                    <div style='width:36px;height:36px;background:#fff3ee;border-radius:50%;text-align:center;line-height:36px;font-size:17px;'>&#128222;</div>
+                  </td>
+                  <td style='padding-left:12px;'>
+                    <p style='margin:0;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;'>Phone Number</p>
+                    <p style='margin:3px 0 0;font-size:16px;font-weight:600;color:#1a1a2e;'>
+                      <a href='tel:{$safe_phone}' style='color:#FC5D09;text-decoration:none;'>{$safe_phone}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Email -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-bottom:25px;'>
+                <tr>
+                  <td width='40' style='vertical-align:top;padding-top:2px;'>
+                    <div style='width:36px;height:36px;background:#fff3ee;border-radius:50%;text-align:center;line-height:36px;font-size:17px;'>&#9993;</div>
+                  </td>
+                  <td style='padding-left:12px;'>
+                    <p style='margin:0;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.8px;'>Email Address</p>
+                    <p style='margin:3px 0 0;font-size:16px;font-weight:600;color:#1a1a2e;'>
+                      <a href='mailto:{$safe_email}' style='color:#FC5D09;text-decoration:none;'>{$safe_email}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Message -->
+              <h2 style='margin:0 0 12px;font-size:16px;color:#0b2356;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #f0f0f0;padding-bottom:10px;'>
+                Message
+              </h2>
+              <div style='background:#f8f9fc;border-radius:8px;padding:18px 20px;border-left:4px solid #FC5D09;'>
+                <p style='margin:0;font-size:15px;color:#333;line-height:1.7;'>{$safe_message}</p>
+              </div>
+
+              <!-- CTA Buttons - full width equal size on all screens -->
+              <table width='100%' cellpadding='0' cellspacing='0' border='0' style='margin-top:28px;'>
+                <tr>
+                  <td style='padding-bottom:10px;'>
+                    <a href='tel:{$safe_phone}'
+                       style='display:block;width:100%;box-sizing:border-box;background:#FC5D09;color:#ffffff;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;text-align:center;letter-spacing:0.3px;'>
+                      &#128222;&nbsp;&nbsp;Call Now
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href='mailto:{$safe_email}'
+                       style='display:block;width:100%;box-sizing:border-box;background:#0b2356;color:#ffffff;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;text-align:center;letter-spacing:0.3px;'>
+                      &#9993;&nbsp;&nbsp;Reply via Email
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style='background:#f8f9fc;border-top:1px solid #eee;padding:20px 35px;text-align:center;'>
+              <p style='margin:0;font-size:12px;color:#999;'>
+                This email was generated automatically by the contact form on
+                <a href='https://bhandaripackersandmovers.in' style='color:#FC5D09;text-decoration:none;'>bhandaripackersandmovers.in</a>
+              </p>
+              <p style='margin:6px 0 0;font-size:12px;color:#bbb;'>
+                &copy; " . date('Y') . " Bhandari Packers and Movers. All rights reserved.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>";
+
                 $mail_settings = $this->get_email_settings();
-                
+
                 $this->load->library('email', $this->config);
                 $this->email->set_newline("\r\n");
                 $this->email->set_crlf("\r\n");
                 $this->email->to($mail_settings['to_email']);
                 $this->email->from($mail_settings['from_email'], $mail_settings['from_name']);
-                if (@$email)
-                    $this->email->reply_to(@$email);
-                $this->email->subject('New Contacts Enquiry Received - ' . $mail_settings['from_name']);
+                if ($email) {
+                    $this->email->reply_to($email, $name);
+                }
+                $this->email->subject('New Contact Enquiry from ' . $safe_name . ' — Bhandari Packers');
                 $this->email->message($message);
-                @$this->email->send();
+
+                $send_result = $this->email->send();
+                if (!$send_result) {
+                    log_message('error', 'Contact email FAILED. To: ' . $mail_settings['to_email']
+                        . ' | From: ' . $mail_settings['from_email']
+                        . ' | SMTP: ' . $this->config['smtp_host'] . ':' . $this->config['smtp_port']
+                        . ' | Debugger: ' . $this->email->print_debugger());
+                } else {
+                    log_message('info', 'Contact email sent OK to: ' . $mail_settings['to_email']);
+                }
+
             } catch (\Exception $e) {
                 log_message('error', 'Contact email send error: ' . $e->getMessage());
             }
         }
         return true;
     }
+
 
     public function send_whatsapp($to, $message)
     {

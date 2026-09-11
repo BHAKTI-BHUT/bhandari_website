@@ -125,7 +125,7 @@ if (empty($custom_content)) {
    ===================================================== */ ?>
 <section class="container py-5" id="about">
   <div class="row align-items-center g-5">
-    <div class="city-content col-lg-6">
+    <div class="city-content <?= (!isset($show_hero_image) || $show_hero_image) ? 'col-lg-6' : 'col-lg-12' ?>">
       <span class="section-label-tag" style="color: #FC5D09; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(252,93,9,0.1); padding: 4px 12px; border-radius: 20px;">Relocate with Ease</span>
       <div class="mt-3">
         <?= $htmlcontent ?>
@@ -135,17 +135,20 @@ if (empty($custom_content)) {
         <a href="<?= site_url('about') ?>" class="btn btn-outline-danger px-4">About Us</a>
       </div>
     </div>
+    <?php if (!isset($show_hero_image) || $show_hero_image): ?>
     <div class="col-lg-6">
       <img src="<?= !empty($hero_image) ? $hero_image : $img ?>"
         alt="Best Packers and Movers in <?= $city_clean ?>"
         class="img-fluid rounded shadow-lg" loading="lazy" style="width: 100%; height: auto; object-fit: cover; aspect-ratio: 4/3;">
     </div>
+    <?php endif; ?>
   </div>
 </section>
 
 <?php /* ===================================================
    SECTION 4 — SERVICES
    ===================================================== */ ?>
+<?php if (!isset($show_services) || $show_services): ?>
 <section class="section-services py-5 bg-light" id="services">
   <div class="container">
     <div class="row justify-content-center text-center mb-5">
@@ -161,47 +164,80 @@ if (empty($custom_content)) {
     </div>
 
     <div class="row g-4">
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
-          <i class="bi bi-house-door text-danger fs-1 mb-3"></i>
-          <h3 class="fs-5 fw-bold mb-2">Home Shifting</h3>
-          <p class="text-muted small mb-0">Safe and careful household relocation in <?= $city_clean ?>.</p>
+      <?php
+      $city_services = [];
+      try {
+          $admin_db = $this->load->database('admin_hub', TRUE);
+          if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('our_services')) {
+              $city_services = $admin_db->where('status', 1)->order_by('sort_order', 'asc')->get('our_services')->result();
+          }
+      } catch (\Exception $e) {
+          log_message('error', 'City view_service services load error: ' . $e->getMessage());
+      }
+      ?>
+
+      <?php if (!empty($city_services)): ?>
+        <?php foreach ($city_services as $srv): ?>
+          <div class="col-md-6 col-lg-3">
+            <a href="<?= site_url('services/' . $srv->slug) ?>" class="text-decoration-none text-dark">
+              <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
+                <i class="<?= !empty($srv->icon_class) ? htmlspecialchars($srv->icon_class) : 'bi bi-house-door' ?> text-danger fs-1 mb-3"></i>
+                <h3 class="fs-5 fw-bold mb-2"><?= htmlspecialchars($srv->service_name) ?></h3>
+                <p class="text-muted small mb-0"><?= htmlspecialchars(mb_strimwidth($srv->short_description, 0, 90, "...")) ?></p>
+              </div>
+            </a>
+          </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
+            <i class="bi bi-house-door text-danger fs-1 mb-3"></i>
+            <h3 class="fs-5 fw-bold mb-2">Home Shifting</h3>
+            <p class="text-muted small mb-0">Safe and careful household relocation in <?= $city_clean ?>.</p>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
-          <i class="bi bi-building text-danger fs-1 mb-3"></i>
-          <h3 class="fs-5 fw-bold mb-2">Office Relocation</h3>
-          <p class="text-muted small mb-0">Fast, secure corporate moving with zero downtime.</p>
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
+            <i class="bi bi-building text-danger fs-1 mb-3"></i>
+            <h3 class="fs-5 fw-bold mb-2">Office Relocation</h3>
+            <p class="text-muted small mb-0">Fast, secure corporate moving with zero downtime.</p>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
-          <i class="bi bi-car-front text-danger fs-1 mb-3"></i>
-          <h3 class="fs-5 fw-bold mb-2">Vehicle Transport</h3>
-          <p class="text-muted small mb-0">Reliable car and bike transportation from <?= $city_clean ?>.</p>
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
+            <i class="bi bi-car-front text-danger fs-1 mb-3"></i>
+            <h3 class="fs-5 fw-bold mb-2">Vehicle Transport</h3>
+            <p class="text-muted small mb-0">Reliable car and bike transportation from <?= $city_clean ?>.</p>
+          </div>
         </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
-          <i class="bi bi-box-seam text-danger fs-1 mb-3"></i>
-          <h3 class="fs-5 fw-bold mb-2">Packing & Unpacking</h3>
-          <p class="text-muted small mb-0">Premium packing materials used for ultimate safety.</p>
+        <div class="col-md-6 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm text-center p-4 service-card-hover">
+            <i class="bi bi-box-seam text-danger fs-1 mb-3"></i>
+            <h3 class="fs-5 fw-bold mb-2">Packing & Unpacking</h3>
+            <p class="text-muted small mb-0">Premium packing materials used for ultimate safety.</p>
+          </div>
         </div>
-      </div>
+      <?php endif; ?>
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 5 — PROCESS & ACHIEVEMENTS
    ===================================================== */ ?>
-<?php $this->load->view('template/shifting.php') ?>
-<?php $this->load->view('template/achievements.php') ?>
+<?php if (!isset($show_shifting_process) || $show_shifting_process): ?>
+  <?php $this->load->view('template/shifting.php') ?>
+<?php endif; ?>
+
+<?php if (!isset($show_achievements) || $show_achievements): ?>
+  <?php $this->load->view('template/achievements.php') ?>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 6 — VIDEOS
    ===================================================== */ ?>
+<?php if (!isset($show_videos) || $show_videos): ?>
 <section class="py-5 bg-light" id="customer-videos">
   <div class="container">
     <div class="row justify-content-center text-center mb-4">
@@ -224,10 +260,12 @@ if (empty($custom_content)) {
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 7 — REVIEWS
    ===================================================== */ ?>
+<?php if (!isset($show_reviews) || $show_reviews): ?>
 <section class="py-5" id="review">
   <div class="container">
     <div class="text-center mb-5">
@@ -291,11 +329,14 @@ if (empty($custom_content)) {
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 8 — FAQ WIDGET
    ===================================================== */ ?>
-<?php $this->load->view('home/faq-widget.php', ['city' => $city_clean, 'faqs' => $faqs ?? null]) ?>
+<?php if (!isset($show_faqs) || $show_faqs): ?>
+  <?php $this->load->view('home/faq-widget.php', ['city' => $city_clean, 'faqs' => $faqs ?? null]) ?>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 9 — CONTACT CTA

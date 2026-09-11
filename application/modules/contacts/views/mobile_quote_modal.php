@@ -239,7 +239,24 @@ $user_mobile_val = ($logged_web_user && !empty($logged_web_user['mobile'])) ? ht
                     <!-- Shifting Time -->
                     <div class="mqm-field">
                         <span class="mqm-icon icon-time"><i class="bi bi-clock"></i></span>
-                        <input type="time" name="shifting_time" id="mqm_time" style="color:#c70000;">
+                        <?php
+                          $mqm_time_options = array(
+                              "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
+                              "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+                              "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
+                              "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
+                              "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM",
+                              "09:00 PM", "09:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
+                              "12:00 AM", "12:30 AM", "01:00 AM", "01:30 AM", "02:00 AM", "02:30 AM",
+                              "03:00 AM", "03:30 AM", "04:00 AM", "04:30 AM", "05:00 AM", "05:30 AM"
+                          );
+                        ?>
+                        <select name="shifting_time" id="mqm_time" style="color:#c70000; font-size:0.95rem; font-weight:600; width:100%; border:none; background:transparent; outline:none;" required>
+                            <option value="" selected>Select Time Slot (12-Hour)</option>
+                            <?php foreach ($mqm_time_options as $t_opt): ?>
+                                <option value="<?= $t_opt ?>"><?= $t_opt ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
                     <div id="mqmResult"></div>
@@ -339,10 +356,93 @@ $(function() {
         if (mqm) mqm.hide();
     });
 
-    // Set min date
-    var today = new Date().toISOString().split('T')[0];
+    function getLocalTodayDateStrMqm() {
+        var d = new Date();
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    // Set min date & min time (+2 hours for today)
+    var today = getLocalTodayDateStrMqm();
     var mqmDate = document.getElementById('mqm_date');
     if (mqmDate) { mqmDate.setAttribute('min', today); if (!mqmDate.value) mqmDate.value = today; }
+
+    function parseMqmTimeToMinutes(timeStr) {
+        if (!timeStr) return -1;
+        timeStr = String(timeStr).trim();
+        var ampmMatch = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+        if (ampmMatch) {
+            var h = parseInt(ampmMatch[1], 10);
+            var m = parseInt(ampmMatch[2], 10);
+            var p = ampmMatch[3].toUpperCase();
+            if (p === 'PM' && h < 12) h += 12;
+            if (p === 'AM' && h === 12) h = 0;
+            return h * 60 + m;
+        }
+        var hr24Match = timeStr.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+        if (hr24Match) {
+            var h24 = parseInt(hr24Match[1], 10);
+            var m24 = parseInt(hr24Match[2], 10);
+            return h24 * 60 + m24;
+        }
+        return -1;
+    }
+
+    function formatMqmMinutesTo12Hour(totalMin) {
+        if (totalMin < 0) return '';
+        if (totalMin >= 1440) {
+            var remMin = totalMin - 1440;
+            var h = Math.floor(remMin / 60);
+            var m = remMin % 60;
+            var period = h >= 12 ? 'PM' : 'AM';
+            var h12 = h % 12; if (h12 === 0) h12 = 12;
+            return String(h12).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ' ' + period + ' (Tomorrow)';
+        } else {
+            var h = Math.floor(totalMin / 60);
+            var m = Math.floor(totalMin % 60);
+            var period = h >= 12 ? 'PM' : 'AM';
+            var h12 = h % 12; if (h12 === 0) h12 = 12;
+            return String(h12).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ' ' + period;
+        }
+    }
+
+    function applyMqmMinTime() {
+        var dateVal = $('#mqm_date').val();
+        var timeSelect = document.getElementById('mqm_time');
+        if (!timeSelect) return;
+
+        var todayStr = getLocalTodayDateStrMqm();
+        var isToday = (!dateVal || dateVal === todayStr);
+
+        var now = new Date();
+        var minAllowedMin = isToday ? (now.getHours() * 60 + now.getMinutes() + 120) : 0;
+
+        var options = timeSelect.options;
+        for (var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            if (!opt.value) continue;
+            var optMin = parseMqmTimeToMinutes(opt.value);
+            if (isToday && optMin >= 0 && optMin < minAllowedMin) {
+                opt.disabled = true;
+                if (!opt.text.includes('(Unavailable)')) {
+                    opt.text = opt.value + ' (Unavailable - Min 2 hrs)';
+                }
+            } else {
+                opt.disabled = false;
+                opt.text = opt.value;
+            }
+        }
+
+        if (timeSelect.selectedIndex >= 0 && timeSelect.options[timeSelect.selectedIndex].disabled) {
+            timeSelect.value = '';
+        }
+    }
+
+    applyMqmMinTime();
+    $('#mqm_date').on('change', applyMqmMinTime);
+    setInterval(applyMqmMinTime, 60000);
 
     // OTP digit auto-advance for mobile modal
     $('.mqm-otp-digit').on('input', function() {
@@ -359,6 +459,31 @@ $(function() {
         }
     });
 
+    function isAllowedMqmPickup(addressStr) {
+        if (!addressStr) return false;
+        var str = addressStr.toLowerCase();
+        var rawCities = (window.allowedPickupCitiesStr) ? window.allowedPickupCitiesStr : 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad';
+        var allowedKeywords = rawCities.split(',').map(function(c) { return c.trim().toLowerCase(); }).filter(function(c) { return c.length > 0; });
+        var extraKeywords = [];
+        allowedKeywords.forEach(function(kw) {
+            if (kw === 'gurugram' || kw === 'gurgaon') {
+                extraKeywords.push('gurugram', 'gurgaon');
+            } else if (kw === 'delhi' || kw === 'new delhi') {
+                extraKeywords.push('delhi', 'new delhi', 'ncr');
+            } else if (kw === 'noida' || kw === 'greater noida') {
+                extraKeywords.push('noida', 'greater noida', 'gautam buddh', 'gautam budh');
+            }
+        });
+        allowedKeywords = allowedKeywords.concat(extraKeywords);
+
+        for (var i = 0; i < allowedKeywords.length; i++) {
+            if (allowedKeywords[i] !== '' && str.indexOf(allowedKeywords[i]) !== -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // ─── Submit from mobile modal ──────────────────────────────────
     $('#mqmSubmitBtn').click(function(e) {
         e.preventDefault();
@@ -371,10 +496,48 @@ $(function() {
 
         if (!name || name.length < 2) { Swal.fire({ title:'Name Required', text:'Please enter your full name.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!mfrom) { Swal.fire({ title:'Pickup Required', text:'Please enter pickup location.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
+        
+        if (!isAllowedMqmPickup(mfrom)) {
+            var noticeCities = window.allowedPickupCitiesStr || 'Delhi, Noida, Greater Noida, Gurugram, Ghaziabad, Faridabad';
+            showSleekNoticeModal(
+                'Pickup Service Unavailable',
+                'Currently, our pickup relocation service is available exclusively from <b>' + noticeCities + '</b>.<br><br>We do not offer pickup services from your selected location.',
+                'Change Location',
+                'location'
+            );
+            $('#mqm_pickup').focus();
+            return;
+        }
+
         if (!mto) { Swal.fire({ title:'Drop Required', text:'Please enter drop location.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!phone || !/^\d{10}$/.test(phone)) { Swal.fire({ title:'Mobile Required', text:'Please enter a valid 10-digit mobile number.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!date) { Swal.fire({ title:'Date Required', text:'Please select shifting date.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!time) { Swal.fire({ title:'Time Required', text:'Please select shifting time.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
+
+        var todayStr = getLocalTodayDateStrMqm();
+        if (date === todayStr) {
+            var selMin = parseMqmTimeToMinutes(time);
+            var now = new Date();
+            var nowMin = now.getHours() * 60 + now.getMinutes();
+            var minAllowedMin = nowMin + 120; // +2 hours
+
+            if (selMin >= 0 && selMin < minAllowedMin) {
+                var currentStr = formatMqmMinutesTo12Hour(nowMin);
+                var earliestStr = minAllowedMin >= 1440 
+                    ? 'No time slots left today. Please select tomorrow\'s date.' 
+                    : formatMqmMinutesTo12Hour(minAllowedMin);
+
+                showSleekNoticeModal(
+                    'Advance Booking (2 Hrs Minimum)',
+                    'Orders must be scheduled at least <b>2 hours</b> in advance.<br><br>' +
+                    '• Current Time: <b>' + currentStr + '</b><br>' +
+                    '• Earliest Allowed Today: <b>' + earliestStr + '</b>',
+                    'Select Valid Time',
+                    'time'
+                );
+                return;
+            }
+        }
 
         // Close mobile quote modal first
         var mqmEl = document.getElementById('mobileQuoteModal');

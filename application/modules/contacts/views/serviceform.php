@@ -702,7 +702,7 @@
                         <a href="<?=site_url('delhi-packers-movers-delhi')?>"><img src="<?= base_url() ?>assets/images/state/delhi.webp" alt="Delhi" class="city-modal-img"></a>
                         <span class="fw-semibold small">Delhi</span>
                     </div>
-                    <div class="col-6 d-flex flex-column align-items-center">
+            <div class="col-6 d-flex flex-column align-items-center">
                         <a href="<?=site_url('agra-packers-movers-uttar-pradesh')?>"><img src="<?= base_url() ?>assets/images/state/uttar-pradesh.webp" alt="Agra" class="city-modal-img"></a>
                         <span class="fw-semibold small">Agra</span>
                     </div>
@@ -719,6 +719,70 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkG4TBQoURnRXy7szzEQP2LqvlEEVfYDM&libraries=places"></script>
 
 <script type="text/javascript">
+<?php
+$CI =& get_instance();
+$CI->load->model('contacts/contacts_mdl');
+$loc_settings = $CI->contacts_mdl->get_location_service_settings();
+$allowed_cities_str = isset($loc_settings['allowed_pickup_cities']) ? $loc_settings['allowed_pickup_cities'] : 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad';
+$max_distance_km = isset($loc_settings['max_relocation_distance_km']) ? floatval($loc_settings['max_relocation_distance_km']) : 300;
+?>
+window.allowedPickupCitiesStr = <?php echo json_encode($allowed_cities_str); ?>;
+window.maxRelocationDistanceKm = <?php echo floatval($max_distance_km); ?>;
+
+// ─── Global Sleek Notice Modal Helper ────────────────────────────────────────
+window.showSleekNoticeModal = function(title, htmlMessage, btnLabel, iconType) {
+    var iconClass = 'bi-geo-alt-fill';
+    var iconBg = '#fff1f0';
+    var iconBorder = '#ffa39e';
+    var iconColor = '#e02424';
+
+    if (iconType === 'distance') {
+        iconClass = 'bi-pin-map-fill';
+        iconBg = '#fff7ed';
+        iconBorder = '#ffedd5';
+        iconColor = '#ea580c';
+    } else if (iconType === 'time') {
+        iconClass = 'bi-clock-history';
+        iconBg = '#eff6ff';
+        iconBorder = '#dbeafe';
+        iconColor = '#2563eb';
+    }
+
+    if (typeof Swal === 'undefined') {
+        alert(title + '\n\n' + htmlMessage.replace(/<[^>]+>/g, ''));
+        return;
+    }
+
+    Swal.fire({
+        width: '380px',
+        padding: '1.25rem 1rem',
+        html:
+            '<div style="text-align:center;">' +
+            '  <div style="width:46px;height:46px;background:' + iconBg + ';border:1.5px solid ' + iconBorder + ';border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin:0 auto 10px;">' +
+            '    <i class="bi ' + iconClass + '" style="color:' + iconColor + ';font-size:22px;"></i>' +
+            '  </div>' +
+            '  <h5 style="font-weight:700;color:#1e293b;font-size:1.02rem;margin-bottom:8px;line-height:1.3;">' + title + '</h5>' +
+            '  <div style="font-size:0.84rem;color:#475569;line-height:1.45;margin-bottom:14px;text-align:left;background:#f8fafc;padding:10px 12px;border-radius:10px;border:1px solid #f1f5f9;">' + htmlMessage + '</div>' +
+            '  <button id="sleekSwalBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:0.86rem;cursor:pointer;width:100%;box-shadow:0 4px 12px rgba(252,93,9,0.25);">' +
+            (btnLabel || 'OK, Got It') +
+            '  </button>' +
+            '</div>',
+        showConfirmButton: false,
+        allowOutsideClick: true,
+        customClass: {
+            popup: 'sleek-swal-compact'
+        },
+        didOpen: function() {
+            var btn = document.getElementById('sleekSwalBtn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    Swal.close();
+                });
+            }
+        }
+    });
+};
+
 // ─── State ─────────────────────────────────────────────────────────────────
 var _isLoggedIn  = false;
 var _pendingSubmit = false;
@@ -734,7 +798,7 @@ $(function () {
     $('#quoteOtpModal').appendTo('body');
     $('#citySelectionModal').appendTo('body');
     // Set min date
-    var today = new Date().toISOString().split('T')[0];
+    var today = (function() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
     var di = document.getElementById('service_shifting_date');
     if (di) { di.setAttribute('min', today); if (!di.value) di.value = today; }
 
@@ -784,55 +848,100 @@ $(function () {
         var date  = $('#service_shifting_date').val().trim();
         var time  = $('#service_shifting_time').val().trim();
 
+        if (!name || name.length < 2) {
+            showSleekNoticeModal('Name Required', 'Please enter your full name.', 'Enter Name', 'location');
+            $('#form_user_name').focus();
+            return;
+        }
+        if (!mfrom) {
+            showSleekNoticeModal('Pickup Location Required', 'Please enter a pickup location to get your moving quote.', 'Enter Pickup', 'location');
+            $('#service_movingfrom').focus();
+            return;
+        }
+        // ─── Validate Google Places selection for Pickup ───────────────────────
+        if (!_isPickupValidQuote) {
+            showSleekNoticeModal(
+                'Select Pickup from Suggestions',
+                'Please select your pickup location from the <b>suggestions dropdown list</b>, rather than typing manually.',
+                'Select Suggestion',
+                'location'
+            );
+            $('#service_movingfrom').focus();
+            return;
+        }
+
+        // ─── Validate Pickup Location Restriction (Dynamic Admin Settings) ──────
+        function isAllowedQuotePickup(addressStr) {
+            if (!addressStr) return false;
+            var str = addressStr.toLowerCase();
+            var rawCities = window.allowedPickupCitiesStr || 'Delhi, Noida, Greater Noida, Gurugram, Gurgaon, Ghaziabad, Faridabad';
+            var allowedKeywords = rawCities.split(',').map(function(c) { return c.trim().toLowerCase(); }).filter(function(c) { return c.length > 0; });
+            
+            var extraKeywords = [];
+            allowedKeywords.forEach(function(kw) {
+                if (kw === 'gurugram' || kw === 'gurgaon') {
+                    extraKeywords.push('gurugram', 'gurgaon');
+                } else if (kw === 'delhi' || kw === 'new delhi') {
+                    extraKeywords.push('delhi', 'new delhi', 'ncr');
+                } else if (kw === 'noida' || kw === 'greater noida') {
+                    extraKeywords.push('noida', 'greater noida', 'gautam buddh', 'gautam budh');
+                }
+            });
+            allowedKeywords = allowedKeywords.concat(extraKeywords);
+
+            for (var i = 0; i < allowedKeywords.length; i++) {
+                if (allowedKeywords[i] !== '' && str.indexOf(allowedKeywords[i]) !== -1) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (!isAllowedQuotePickup(mfrom)) {
+            var noticeCities = window.allowedPickupCitiesStr || 'Delhi, Noida, Greater Noida, Gurugram, Ghaziabad, Faridabad';
+            showSleekNoticeModal(
+                'Pickup Service Unavailable',
+                'Currently, our pickup relocation service is available exclusively from <b>' + noticeCities + '</b>.<br><br>We do not offer pickup services from your selected location.',
+                'Change Pickup Location',
+                'location'
+            );
+            $('#service_movingfrom').focus();
+            return;
+        }
+
+        if (!mto) {
+            showSleekNoticeModal('Drop Location Required', 'Please enter a drop location to get your moving quote.', 'Enter Drop Location', 'location');
+            $('#service_movingTo').focus();
+            return;
+        }
+        // ─── Validate Google Places selection for Drop ────────────────────────
+        if (!_isDropValidQuote) {
+            showSleekNoticeModal(
+                'Select Drop from Suggestions',
+                'Please select your drop location from the <b>suggestions dropdown list</b>, rather than typing manually.',
+                'Select Suggestion',
+                'location'
+            );
+            $('#service_movingTo').focus();
+            return;
+        }
+        if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+            showSleekNoticeModal('Mobile Required', 'Please enter a valid 10-digit mobile number.', 'Enter Mobile Number', 'location');
+            $('#service_form_phone').focus();
+            return;
+        }
+        if (!date) {
+            showSleekNoticeModal('Date Required', 'Please select shifting date.', 'Select Date', 'time');
+            $('#service_shifting_date').focus();
+            return;
+        }
+
         // ─── T&C Checkbox Validation ───────────────────────────────────────────
         if (!$('#tc_agree_checkbox').is(':checked')) {
             $('#tc_error_msg').fadeIn(200);
             return;
         } else {
             $('#tc_error_msg').hide();
-        }
-
-        if (!name || name.length < 2) {
-            Swal.fire({ title: 'Name Required', text: 'Please enter your full name.', icon: 'warning', confirmButtonColor: '#FC5D09' });
-            return;
-        }
-        if (!mfrom) {
-            Swal.fire({ title: 'Pickup Required', text: 'Please enter pickup location.', icon: 'warning', confirmButtonColor: '#FC5D09' });
-            return;
-        }
-        // ─── Validate Google Places selection for Pickup ───────────────────────
-        if (!_isPickupValidQuote) {
-            Swal.fire({
-                title: 'Invalid Pickup Location',
-                text: 'Please select a valid pickup location from the suggestions dropdown.',
-                icon: 'warning',
-                confirmButtonColor: '#FC5D09'
-            });
-            $('#service_movingfrom').focus();
-            return;
-        }
-        if (!mto) {
-            Swal.fire({ title: 'Drop Required', text: 'Please enter drop location.', icon: 'warning', confirmButtonColor: '#FC5D09' });
-            return;
-        }
-        // ─── Validate Google Places selection for Drop ────────────────────────
-        if (!_isDropValidQuote) {
-            Swal.fire({
-                title: 'Invalid Drop Location',
-                text: 'Please select a valid drop location from the suggestions dropdown.',
-                icon: 'warning',
-                confirmButtonColor: '#FC5D09'
-            });
-            $('#service_movingTo').focus();
-            return;
-        }
-        if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-            Swal.fire({ title: 'Mobile Required', text: 'Please enter a valid 10-digit mobile number.', icon: 'warning', confirmButtonColor: '#FC5D09' });
-            return;
-        }
-        if (!date) {
-            Swal.fire({ title: 'Date Required', text: 'Please select shifting date.', icon: 'warning', confirmButtonColor: '#FC5D09' });
-            return;
         }
         // Save to localStorage for pre-filling online booking wizard
         var qData = {
@@ -1066,7 +1175,7 @@ function submitBooking(isVerified) {
                 // Redirect immediately with success status query parameter
                 window.location.href = '<?= site_url("online-booking?status=success") ?>';
                 $('#service_form')[0].reset();
-                var today = new Date().toISOString().split('T')[0];
+                var today = (function() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
                 document.getElementById('service_shifting_date').value = today;
             } else {
                 var cleanMsg = $('<div>').html(data).text().trim() || data;

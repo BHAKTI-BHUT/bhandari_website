@@ -103,6 +103,30 @@
         "rating": 4.9,
         "reviews": [
             {
+                "author_name": "Bhakti Bhut",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/106037838217081735899\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjVFZ_MRFzhR-LotdFO4j39m28i1ZGTyzJ28vOy06QgOFzFYY9Ly=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "in the last week",
+                "text": "One of the best moving experiences I have had. Bhandari Packers and Movers provided professional packing, safe transportation, careful loading and unloading, and timely delivery. The team was polite and responsive throughout the relocation. I highly recommend Bhandari Packers and Movers for home shifting, office relocation, and packing and moving services.",
+                "time": 1788969743,
+                "translated": false
+            },
+            {
+                "author_name": "Dharmesh Vasiya",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/103148106217996666044\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocIywi0_usqYGjLM6tJeSYkJHPVJ_mdnsjIIgULyoYrBgN1-mw=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "in the last week",
+                "text": "The experience with Bhandari Packers and Movers was really good. The team was polite, professional, and handled everything carefully. They arrived on time and made the entire shifting process smooth and hassle-free. I\u2019m happy with their service and would definitely recommend them to others.",
+                "time": 1788894439,
+                "translated": false
+            },
+            {
                 "author_name": "Aman Yadav",
                 "author_url": "https:\/\/www.google.com\/maps\/contrib\/110920371170278307996\/reviews",
                 "language": "en",
@@ -121,7 +145,7 @@
                 "original_language": "en",
                 "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocLXPH-fE5-0XDiJ3BqOQ9dKKSs17cIeDbvImO9CgZmTrlJpHg=s128-c0x00000000-cc-rp-mo",
                 "rating": 5,
-                "relative_time_description": "in the last week",
+                "relative_time_description": "a week ago",
                 "text": "Best packing and moving services will book again",
                 "time": 1788439632,
                 "translated": false
@@ -137,34 +161,10 @@
                 "text": "Great experience, very helpful with everything, helped a lot with shifting",
                 "time": 1788256117,
                 "translated": false
-            },
-            {
-                "author_name": "AMAN KUMAR",
-                "author_url": "https:\/\/www.google.com\/maps\/contrib\/105331995086452450274\/reviews",
-                "language": "en",
-                "original_language": "en",
-                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocJEC1_70Pu7uv696YvLebQdu-gL1pPWrUOQDfQQmyqp5V1NgK4=s128-c0x00000000-cc-rp-mo",
-                "rating": 5,
-                "relative_time_description": "a week ago",
-                "text": "Good service",
-                "time": 1788163842,
-                "translated": false
-            },
-            {
-                "author_name": "Ajay Mahi",
-                "author_url": "https:\/\/www.google.com\/maps\/contrib\/116351071867463329489\/reviews",
-                "language": "en",
-                "original_language": "en",
-                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjWNjpygxy0HFngEdPQWmOz9D40cuxqGier2Cmu0Cb0jt9-seCY5=s128-c0x00000000-cc-rp-mo",
-                "rating": 5,
-                "relative_time_description": "a week ago",
-                "text": "Good experience bhandari packers and movers",
-                "time": 1787795178,
-                "translated": false
             }
         ],
         "url": "https:\/\/maps.google.com\/?cid=11321227447965075053",
-        "user_ratings_total": 18
+        "user_ratings_total": 19
     },
     "status": "OK"
 }
