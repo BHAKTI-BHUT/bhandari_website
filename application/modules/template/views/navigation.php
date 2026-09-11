@@ -12,8 +12,8 @@ try {
 ?>
 <header class="site-header sticky-top" style="z-index: 1050;">
 <div class="top-bar">
-    <div class="container">
-        <div class="top-bar-links d-flex align-items-center justify-content-start gap-2 gap-md-3">
+    <div class="container-fluid px-3">
+        <div class="top-bar-links d-flex align-items-center justify-content-start justify-content-md-center gap-2 gap-md-3 w-100">
             <a href="<?=site_url('services')?>" class="top-bar-link">Our Services</a>
             <span class="top-bar-divider">|</span>
             <a href="<?=site_url('why-choose-us')?>" class="top-bar-link">Why Choose Us</a>
@@ -56,12 +56,23 @@ try {
     width: 0 !important;
     height: 0 !important;
 }
-.top-bar .container {
+.top-bar .container-fluid {
     padding-left: 15px;
-    padding-right: 30px; /* Ensures text doesn't cut off at edge on mobile scroll */
+    padding-right: 15px;
+}
+@media (max-width: 767.98px) {
+    .top-bar .container-fluid {
+        padding-right: 30px; /* Ensures text doesn't cut off at edge on mobile scroll */
+    }
 }
 .top-bar-links {
     min-width: max-content;
+}
+@media (min-width: 768px) {
+    .top-bar-links {
+        justify-content: center !important;
+        width: 100% !important;
+    }
 }
 .top-bar-link {
     color: #ffffff !important;
