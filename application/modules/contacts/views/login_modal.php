@@ -410,31 +410,44 @@ function setLoggedOut() {
 }
 
 // ─── Open Login Modal ───
-function openLoginModal() {
-    var stored = localStorage.getItem('bhandari_user');
-    if (stored) {
-        try {
-            var user = JSON.parse(stored);
-            if (user && user.name && user.mobile) {
-                $.ajax({
-                    type: 'POST', url: '<?= site_url("user-auth/check-mobile") ?>',
-                    data: { mobile: user.mobile }, dataType: 'json',
-                    success: function (r) {
-                        if (r.exists) {
-                            localStorage.setItem('bhandari_user', JSON.stringify({ name: r.name, mobile: r.mobile }));
-                            showReturningUserForm(r.name, r.mobile);
-                        } else { showLoginForm(true); }
-                    },
-                    error: function () { showReturningUserForm(user.name, user.mobile); }
-                });
-            } else { showLoginForm(false); }
-        } catch (e) { showLoginForm(false); }
-    } else { showLoginForm(false); }
+function openLoginModal(prefillMobile) {
+    var mobileToUse = (typeof prefillMobile === 'string' && prefillMobile.trim().length > 0) ? prefillMobile.trim() : '';
+    if (!mobileToUse && $('#wizardPhone').length && $('#wizardPhone').val()) {
+        mobileToUse = $('#wizardPhone').val().trim();
+    }
+    if (!mobileToUse && $('#service_form_phone').length && $('#service_form_phone').val()) {
+        mobileToUse = $('#service_form_phone').val().trim();
+    }
+
+    if (mobileToUse) {
+        showLoginForm(false);
+        $('#loginMobile').val(mobileToUse);
+    } else {
+        var stored = localStorage.getItem('bhandari_user');
+        if (stored) {
+            try {
+                var user = JSON.parse(stored);
+                if (user && user.name && user.mobile) {
+                    $.ajax({
+                        type: 'POST', url: '<?= site_url("user-auth/check-mobile") ?>',
+                        data: { mobile: user.mobile }, dataType: 'json',
+                        success: function (r) {
+                            if (r.exists) {
+                                localStorage.setItem('bhandari_user', JSON.stringify({ name: r.name, mobile: r.mobile }));
+                                showReturningUserForm(r.name, r.mobile);
+                            } else { showLoginForm(true); }
+                        },
+                        error: function () { showReturningUserForm(user.name, user.mobile); }
+                    });
+                } else { showLoginForm(false); }
+            } catch (e) { showLoginForm(false); }
+        } else { showLoginForm(false); }
+    }
 
     $('#loginFormError, #returningUserError').hide().text('');
-    $('#loginName, #loginEmail, #loginMobile').val('');
-    if ($('#form_user_name').length && $('#form_user_name').val()) $('#loginName').val($('#form_user_name').val());
-    if ($('#service_form_phone').length && $('#service_form_phone').val()) $('#loginMobile').val($('#service_form_phone').val());
+    if (mobileToUse) {
+        $('#loginMobile').val(mobileToUse);
+    }
     var modal = new bootstrap.Modal(document.getElementById('otpLoginModal'));
     modal.show();
 }
@@ -621,6 +634,33 @@ function sendOtp(isReturning) {
         success: function(r) {
             if (!r.success) {
                 btn.prop('disabled', false).html(origHtml);
+
+                // If already registered, show alert and redirect to login screen
+                if (r.already_registered) {
+                    Swal.fire({
+                        html:
+                            '<div style="text-align:center;padding:6px 0;">'
+                            + '<div style="width:56px;height:56px;background:#fff3cd;border:2px solid #ffc107;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">'
+                            + '<i class="bi bi-exclamation-triangle-fill" style="color:#e67e22;font-size:26px;"></i>'
+                            + '</div>'
+                            + '<h4 style="font-weight:800;color:#1a1a2e;margin-bottom:6px;font-size:1.15rem;">Already Registered!</h4>'
+                            + '<p style="font-size:0.85rem;color:#4a5568;line-height:1.5;margin-bottom:14px;">'
+                            + 'This number <strong>' + (r.mobile || mobile) + '</strong> is already registered as <strong>' + (r.name || 'User') + '</strong>.<br>Please login with your number.'
+                            + '</p>'
+                            + '</div>',
+                        icon: null,
+                        confirmButtonText: '<i class="bi bi-box-arrow-in-right me-1"></i> Login Now',
+                        confirmButtonColor: '#FC5D09',
+                        allowOutsideClick: false,
+                        customClass: { popup: 'swal-bhandari-welcome' }
+                    }).then(function() {
+                        // Pre-fill mobile and switch to phone-only login screen
+                        showPhoneOnlyLoginScreen();
+                        $('#phoneOnlyMobile').val(r.mobile || mobile);
+                    });
+                    return;
+                }
+
                 showFormError(r.message, isReturning);
                 return;
             }

@@ -1,19 +1,31 @@
 <?php if ($this->uri->segment(1) !== 'online-booking'): ?>
+<?php
+$f_company3       = !empty($company3) ? $company3 : 'Bhandari Packers and Movers';
+$f_facebookhtml   = !empty($facebookhtml) ? $facebookhtml : 'https://www.facebook.com/share/1ZqpTWpfwE/';
+$f_instagramhtml  = !empty($instagramhtml) ? $instagramhtml : 'https://www.instagram.com/bhandaripackers?igsh=d24zZ2ZpcHBsbGps';
+$f_youtubehtml    = !empty($youtubehtml) ? $youtubehtml : 'https://youtube.com/@bhandaripackersandmovers?si=zB430aIlN8su81TU';
+$f_address        = !empty($address) ? $address : 'Office No 504, 5th floor baba Arcade, Harola, Sector 5 Noida, Distt, Gautam Budh Nagar, UTTAR PRADESH India.';
+$f_phone          = !empty($phone) ? $phone : '7303257332';
+$f_phonehtml      = !empty($phonehtml) ? $phonehtml : 'tel:+917303257332';
+$f_mail           = !empty($mail) ? $mail : 'info@bhandaripackersandmovers.in';
+$f_mailhtml       = !empty($mailhtml) ? $mailhtml : 'mailto:info@bhandaripackersandmovers.in';
+$f_businessHours  = !empty($businessHours) ? $businessHours : 'Mon-Sat: 9AM - 6PM';
+?>
     <footer style="background: linear-gradient(180deg, #0B2562 0%, #001C66 100%); color: #ffffff;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <span class="text-white fs-3"><?= $company3 ?></span>
+                    <span class="text-white fs-3"><?= htmlspecialchars($f_company3) ?></span>
                     <p class="text-white mt-4">Providing reliable and efficient packing and moving services across India since 2005. Your trust is our priority.</p>
                     <div class="mt-3">
-                        <?php if (!empty($facebookhtml)): ?>
-                        <a href="<?= $facebookhtml ?>" target="_blank" aria-label="facebook" class="social-icon me-2"><i class="bi bi-facebook"></i></a>
+                        <?php if (!empty($f_facebookhtml)): ?>
+                        <a href="<?= htmlspecialchars($f_facebookhtml) ?>" target="_blank" aria-label="facebook" class="social-icon me-2"><i class="bi bi-facebook"></i></a>
                         <?php endif; ?>
-                        <?php if (!empty($instagramhtml)): ?>
-                        <a href="<?= $instagramhtml ?>" target="_blank" aria-label="instagram" class="social-icon me-2"><i class="bi bi-instagram"></i></a>
+                        <?php if (!empty($f_instagramhtml)): ?>
+                        <a href="<?= htmlspecialchars($f_instagramhtml) ?>" target="_blank" aria-label="instagram" class="social-icon me-2"><i class="bi bi-instagram"></i></a>
                         <?php endif; ?>
-                        <?php if (!empty($youtubehtml)): ?>
-                        <a href="<?= $youtubehtml ?>" target="_blank" aria-label="youtube" class="social-icon"><i class="bi bi-youtube"></i></a>
+                        <?php if (!empty($f_youtubehtml)): ?>
+                        <a href="<?= htmlspecialchars($f_youtubehtml) ?>" target="_blank" aria-label="youtube" class="social-icon"><i class="bi bi-youtube"></i></a>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -32,10 +44,10 @@
 $footer_services = [];
 try {
     $admin_db = $this->load->database('admin_hub', TRUE);
-    if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('our_services')) {
+    if (is_object($admin_db) && !empty($admin_db->conn_id) && $admin_db->table_exists('our_services')) {
         $footer_services = $admin_db->where('status', 1)->order_by('sort_order', 'asc')->limit(6)->get('our_services')->result();
     }
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     log_message('error', 'Footer services load error: ' . $e->getMessage());
 }
 ?>
@@ -58,17 +70,17 @@ try {
                 <div class="col-lg-3 col-md-4 mb-2 mb-md-0">
                     <span class="text-white fs-2 mb-4">Contact Us</span>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i><?= $address ?></li>
-                        <li class="mb-2"><i class="bi bi-telephone me-2"></i><a href="<?=$phonehtml?>" class="text-white text-decoration-none"><?= $phone ?></a></li>
-                        <li class="mb-2"><i class="bi bi-envelope me-2"></i><a href="<?=$mailhtml?>" class="text-white text-decoration-none"><?= $mail ?></a></li>
-                        <li class="mb-2"><i class="bi bi-clock me-2"></i> <?= !empty($businessHours) ? $businessHours : 'Mon-Sat: 9AM - 6PM' ?></li>
+                        <li class="mb-2"><i class="bi bi-geo-alt me-2"></i><?= htmlspecialchars($f_address) ?></li>
+                        <li class="mb-2"><i class="bi bi-telephone me-2"></i><a href="<?= htmlspecialchars($f_phonehtml) ?>" class="text-white text-decoration-none"><?= htmlspecialchars($f_phone) ?></a></li>
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i><a href="<?= htmlspecialchars($f_mailhtml) ?>" class="text-white text-decoration-none"><?= htmlspecialchars($f_mail) ?></a></li>
+                        <li class="mb-2"><i class="bi bi-clock me-2"></i> <?= htmlspecialchars($f_businessHours) ?></li>
                     </ul>
                 </div>
             </div>
             <hr class="mt-4 mb-2" style="border-color: rgba(255,255,255,0.1);">
             <div class="d-flex align-items-center justify-content-center">
                 <div class="col-md-6 text-center">
-                    <p class="mb-0">&copy; <?= date('Y') ?> <?= $company3 ?>. All Rights Reserved.</p>
+                    <p class="mb-0">&copy; <?= date('Y') ?> <?= htmlspecialchars($f_company3) ?>. All Rights Reserved.</p>
                 </div>
             </div>
         </div>

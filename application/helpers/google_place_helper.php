@@ -178,8 +178,8 @@ if (!function_exists('get_all_approved_reviews')) {
             log_message('error', 'Error fetching DB customer_reviews: ' . $e->getMessage());
         }
 
-        // 2. Fetch Google Place API reviews ONLY IF DB has no records
-        if (!$hasDbRecords) {
+        // 2. Fetch Google Place API reviews IF DB returned no approved reviews
+        if (empty($allReviews)) {
             $googleData = get_google_place_details();
             if (!empty($googleData['reviews'])) {
                 foreach ($googleData['reviews'] as $gRev) {

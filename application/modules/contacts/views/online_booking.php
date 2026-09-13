@@ -4,17 +4,56 @@
     z-index: 20000 !important;
 }
 .sleek-booking-confirmed-modal {
-    border-radius: 18px !important;
-    padding: 24px 28px !important;
-    max-width: 92vw !important;
-    max-height: 86vh !important;
-    overflow-y: auto !important;
+    width: 500px !important;
+    max-width: 94vw !important;
+    border-radius: 20px !important;
+    padding: 16px 20px !important;
+    max-height: 94vh !important;
     box-shadow: 0 20px 60px rgba(0,0,0,0.25) !important;
 }
 @media (max-width: 576px) {
     .sleek-booking-confirmed-modal {
-        padding: 18px 16px !important;
+        width: 94vw !important;
+        padding: 12px 12px !important;
+        border-radius: 16px !important;
+        max-height: 96vh !important;
+        margin: auto !important;
     }
+    .sleek-booking-confirmed-modal .swal2-html-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+}
+.swal2-container.swal2-top-end, .swal2-container.swal2-top-right {
+    z-index: 20005 !important;
+}
+.swal2-toast-custom {
+    border-radius: 12px !important;
+    padding: 12px 18px !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
+    font-family: inherit !important;
+    display: flex !important;
+    align-items: center !important;
+    width: auto !important;
+    max-width: 420px !important;
+}
+.swal2-toast-custom .swal2-title {
+    font-size: 0.88rem !important;
+    font-weight: 600 !important;
+    color: #1e293b !important;
+    margin: 0 0 0 10px !important;
+    line-height: 1.4 !important;
+}
+.swal2-toast-custom .swal2-icon {
+    margin: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+}
+.swal2-toast-custom .swal2-icon .swal2-icon-content {
+    font-size: 15px !important;
 }
 
 /* CSS Wizard design enhancements */
@@ -275,15 +314,17 @@ body {
     z-index: 20000 !important;
 }
 .sleek-booking-confirmed-modal {
+    width: 540px !important;
+    max-width: 92vw !important;
     border-radius: 18px !important;
     padding: 24px 28px !important;
-    max-width: 92vw !important;
-    max-height: 86vh !important;
+    max-height: 88vh !important;
     overflow-y: auto !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25) !important;
 }
 @media (max-width: 576px) {
     .sleek-booking-confirmed-modal {
+        width: 92vw !important;
         padding: 18px 16px !important;
         border-radius: 14px !important;
     }
@@ -1651,7 +1692,8 @@ function resolveAddressToCoordinates(address, placeId, callback) {
     }
 
     function tryNominatim() {
-        const nominatimUrl = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(address) + '&format=json&limit=1';
+        const queryAddress = (address.toLowerCase().indexOf('india') === -1) ? address + ', India' : address;
+        const nominatimUrl = 'https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(queryAddress) + '&format=json&countrycodes=in&limit=1';
         $.ajax({
             url: nominatimUrl,
             type: 'GET',
@@ -1900,7 +1942,7 @@ function checkLocationAndDistanceRestrictions() {
 
 setupWebLocationAutocomplete('wizardPickup', 'web_pickup_suggestions', 'web_pickup_lat', 'web_pickup_lon', function() { 
     _isPickupValidWizard = true; 
-    checkLocationAndDistanceRestrictions();
+    calculateWebRealDistanceKM();
 });
 setupWebLocationAutocomplete('wizardDrop', 'web_drop_suggestions', 'web_drop_lat', 'web_drop_lon', function() { 
     _isDropValidWizard = true; 
@@ -2707,17 +2749,29 @@ function handleWizardSubmit() {
         $('#wizardPhone').val(phone);
     }
 
-    // 2. Check if user is logged in
+    // 2. Check if user is logged in and mobile matches
     $.getJSON('<?= site_url("user-auth/check-login") ?>', function(r) {
-        if (r.logged_in) {
-            if (r.user && r.user.mobile) {
-                $('#wizardPhone').val(r.user.mobile);
+        let formPhone = String($('#wizardPhone').val() || '').replace(/\D/g, '');
+        if (r.logged_in && r.user && r.user.mobile) {
+            let verifiedMobile = String(r.user.mobile).replace(/\D/g, '');
+            // If phone in form is specified and does NOT match current verified session mobile, prompt OTP verification
+            if (formPhone && formPhone !== verifiedMobile) {
+                window._pendingWizardSubmit = true;
+                if (typeof openLoginModal === 'function') {
+                    openLoginModal(formPhone);
+                }
+                return;
+            }
+            if (!formPhone && verifiedMobile) {
+                $('#wizardPhone').val(verifiedMobile);
             }
             executeWizardSubmission();
         } else {
-            // Not logged in. Queue wizard submission
+            // Not logged in. Queue wizard submission and open OTP login modal
             window._pendingWizardSubmit = true;
-            openLoginModal();
+            if (typeof openLoginModal === 'function') {
+                openLoginModal(formPhone);
+            }
         }
     });
 }
@@ -2905,6 +2959,13 @@ function saveNewBookingAndPay() {
                     openRegistrationPayment(bookingId, fee);
                 } else {
                     showToast((res && res.message) || 'Could not save booking details.', 'error');
+                    if (res && res.message && (res.message.indexOf('verify') !== -1 || res.message.indexOf('OTP') !== -1 || res.message.indexOf('mobile') !== -1)) {
+                        window._pendingWizardSubmit = true;
+                        let formPhone = String($('#wizardPhone').val() || '').replace(/\D/g, '');
+                        if (typeof openLoginModal === 'function') {
+                            openLoginModal(formPhone);
+                        }
+                    }
                 }
             } catch(e) {
                 showToast(typeof r === 'string' ? r : 'Could not save booking details.', 'error');
@@ -2954,33 +3015,33 @@ function updateRegistrationPaymentStatus(bookingId, status, paymentId, orderId) 
                 var pAmount  = parseFloat(window.lastPaidRegFee || 500).toFixed(2);
 
                 Swal.fire({
-                    width: '540px',
+                    width: '500px',
                     customClass: {
                         container: 'swal2-top-zindex',
                         popup: 'sleek-booking-confirmed-modal'
                     },
                     html:
                         '<div style="text-align:center;">'
-                        + '<div style="position:relative; width:56px; height:56px; margin:0 auto 12px;">'
-                        + '<svg style="position:absolute; top:-10px; left:-10px; width:76px; height:76px; pointer-events:none;" viewBox="0 0 100 100">'
+                        + '<div style="position:relative; width:44px; height:44px; margin:0 auto 6px;">'
+                        + '<svg style="position:absolute; top:-8px; left:-8px; width:60px; height:60px; pointer-events:none;" viewBox="0 0 100 100">'
                         + '<circle cx="20" cy="18" r="3" fill="#e53e3e" opacity="0.6"/><circle cx="82" cy="22" r="3" fill="#dd6b20" opacity="0.6"/><circle cx="15" cy="78" r="3.5" fill="#319795" opacity="0.6"/><circle cx="85" cy="80" r="3.5" fill="#38a169" opacity="0.6"/><polygon points="50,4 53,10 47,10" fill="#38a169" opacity="0.7"/><polygon points="8,50 14,53 14,47" fill="#dd6b20" opacity="0.7"/><polygon points="92,48 98,51 98,45" fill="#319795" opacity="0.7"/>'
                         + '</svg>'
-                        + '<div style="width:56px; height:56px; background:linear-gradient(135deg,#38ef7d,#11998e); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px rgba(56,239,125,0.35); position:relative; z-index:1;"><div style="width:32px; height:32px; border:2.5px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="bi bi-check-lg" style="color:#ffffff; font-size:20px; font-weight:800;"></i></div></div>'
+                        + '<div style="width:44px; height:44px; background:linear-gradient(135deg,#38ef7d,#11998e); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(56,239,125,0.35); position:relative; z-index:1;"><div style="width:24px; height:24px; border:2px solid #ffffff; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="bi bi-check-lg" style="color:#ffffff; font-size:16px; font-weight:800;"></i></div></div>'
                         + '</div>'
-                        + '<h3 style="font-weight:800; color:#1a1a2e; margin:0 0 4px; font-size:1.3rem; letter-spacing:-0.4px;">Booking Confirmed!</h3>'
-                        + '<div style="width:36px; height:3px; background:#FC5D09; border-radius:3px; margin:0 auto 10px;"></div>'
-                        + '<p style="font-size:0.85rem; color:#4a5568; line-height:1.45; margin-bottom:14px; padding:0 10px;">We have successfully received your token amount and your booking is confirmed.</p>'
-                        + '<div style="background:linear-gradient(135deg,#f0fff4,#e6fffa); border:1px solid #c6f6d5; border-radius:12px; padding:10px 14px; margin-bottom:16px; display:flex; align-items:center; gap:10px; text-align:left;"><div style="width:34px; height:34px; background:#ffffff; border:1.5px solid #38a169; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="bi bi-calendar-check" style="color:#38a169; font-size:17px;"></i></div><div style="font-size:0.82rem; color:#2d3748; line-height:1.4; font-weight:600;">We are preparing for your order and will keep you updated at every step.</div></div>'
-                        + '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; margin-bottom:18px; text-align:left;">'
-                        + '<div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; padding-bottom:10px; border-bottom:1px dashed #e2e8f0;"><div style="width:28px; height:28px; background:#fff5ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09; font-size:14px;"></i></div><div style="flex-grow:1;"><div style="font-size:0.7rem; color:#718096; text-transform:uppercase; font-weight:700; letter-spacing:0.4px;">Pickup Location</div><div style="font-size:0.84rem; color:#1a202c; font-weight:700; word-break:break-word; margin-top:1px;">' + pAddress + '</div></div></div>'
-                        + '<div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px dashed #e2e8f0;"><div style="width:28px; height:28px; background:#fff5ed; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09; font-size:14px;"></i></div><div style="flex-grow:1;"><div style="font-size:0.7rem; color:#718096; text-transform:uppercase; font-weight:700; letter-spacing:0.4px;">Drop Location</div><div style="font-size:0.84rem; color:#1a202c; font-weight:700; word-break:break-word; margin-top:1px;">' + dAddress + '</div></div></div>'
-                        + '<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px;">'
-                        + '<div style="flex:1; min-width:140px; background:#ffffff; border:1px solid #edf2f7; border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px;"><i class="bi bi-calendar-event-fill" style="color:#FC5D09; font-size:16px;"></i><div><div style="font-size:0.68rem; color:#718096; font-weight:700; text-transform:uppercase;">Moving Date</div><div style="font-size:0.82rem; color:#1a202c; font-weight:700;">' + mDate + '</div></div></div>'
-                        + '<div style="flex:1; min-width:140px; background:#ffffff; border:1px solid #edf2f7; border-radius:10px; padding:8px 10px; display:flex; align-items:center; gap:8px;"><i class="bi bi-shield-check" style="color:#38a169; font-size:18px;"></i><div><div style="font-size:0.68rem; color:#718096; font-weight:700; text-transform:uppercase;">Token Paid</div><div style="font-size:0.82rem; color:#276749; font-weight:800;">₹' + pAmount + ' <span style="font-size:0.68rem; font-weight:600; color:#38a169;">(Verified)</span></div></div></div>'
+                        + '<h3 style="font-weight:800; color:#1a1a2e; margin:0 0 2px; font-size:1.12rem; letter-spacing:-0.3px;">Booking Confirmed!</h3>'
+                        + '<div style="width:30px; height:3px; background:#FC5D09; border-radius:3px; margin:0 auto 6px;"></div>'
+                        + '<p style="font-size:0.78rem; color:#4a5568; line-height:1.35; margin-bottom:8px; padding:0 4px;">We have received your token amount & your booking is confirmed.</p>'
+                        + '<div style="background:linear-gradient(135deg,#f0fff4,#e6fffa); border:1px solid #c6f6d5; border-radius:10px; padding:7px 10px; margin-bottom:8px; display:flex; align-items:center; gap:8px; text-align:left;"><div style="width:28px; height:28px; background:#ffffff; border:1.5px solid #38a169; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="bi bi-calendar-check" style="color:#38a169; font-size:14px;"></i></div><div style="font-size:0.75rem; color:#2d3748; line-height:1.3; font-weight:600;">We are preparing for your order & will keep you updated at every step.</div></div>'
+                        + '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; margin-bottom:10px; text-align:left;">'
+                        + '<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #e2e8f0;"><div style="width:24px; height:24px; background:#fff5ed; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09; font-size:12px;"></i></div><div style="flex-grow:1; min-width:0;"><div style="font-size:0.62rem; color:#718096; text-transform:uppercase; font-weight:700; letter-spacing:0.3px;">Pickup Location</div><div style="font-size:0.78rem; color:#1a202c; font-weight:700; word-break:break-word; margin-top:0px; line-height:1.25;">' + pAddress + '</div></div></div>'
+                        + '<div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:6px; padding-bottom:6px; border-bottom:1px dashed #e2e8f0;"><div style="width:24px; height:24px; background:#fff5ed; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;"><i class="bi bi-geo-alt-fill" style="color:#FC5D09; font-size:12px;"></i></div><div style="flex-grow:1; min-width:0;"><div style="font-size:0.62rem; color:#718096; text-transform:uppercase; font-weight:700; letter-spacing:0.3px;">Drop Location</div><div style="font-size:0.78rem; color:#1a202c; font-weight:700; word-break:break-word; margin-top:0px; line-height:1.25;">' + dAddress + '</div></div></div>'
+                        + '<div style="display:flex; gap:6px; margin-bottom:8px;">'
+                        + '<div style="flex:1; background:#ffffff; border:1px solid #edf2f7; border-radius:8px; padding:6px 8px; display:flex; align-items:center; gap:6px; min-width:0;"><i class="bi bi-calendar-event-fill" style="color:#FC5D09; font-size:14px; flex-shrink:0;"></i><div style="min-width:0;"><div style="font-size:0.6rem; color:#718096; font-weight:700; text-transform:uppercase;">Moving Date</div><div style="font-size:0.75rem; color:#1a202c; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + mDate + '</div></div></div>'
+                        + '<div style="flex:1; background:#ffffff; border:1px solid #edf2f7; border-radius:8px; padding:6px 8px; display:flex; align-items:center; gap:6px; min-width:0;"><i class="bi bi-shield-check" style="color:#38a169; font-size:15px; flex-shrink:0;"></i><div style="min-width:0;"><div style="font-size:0.6rem; color:#718096; font-weight:700; text-transform:uppercase;">Token Paid</div><div style="font-size:0.75rem; color:#276749; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">₹' + pAmount + ' <span style="font-size:0.6rem; font-weight:600; color:#38a169;">(Verified)</span></div></div></div>'
                         + '</div>'
-                        + '<div style="background:linear-gradient(135deg, #fff5ed, #ffede0); border:1.5px solid #ffcca8; border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between;"><div style="display:flex; align-items:center; gap:8px;"><div style="width:28px; height:28px; background:#FC5D09; border-radius:6px; display:flex; align-items:center; justify-content:center;"><i class="bi bi-wallet2" style="color:#ffffff; font-size:13px;"></i></div><span style="font-weight:700; color:#2d3748; font-size:0.88rem;">Total Paid</span></div><div style="color:#FC5D09; font-weight:850; font-size:1.1rem;">₹' + pAmount + '</div></div>'
+                        + '<div style="background:linear-gradient(135deg, #fff5ed, #ffede0); border:1.5px solid #ffcca8; border-radius:8px; padding:7px 10px; display:flex; align-items:center; justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px;"><div style="width:24px; height:24px; background:#FC5D09; border-radius:5px; display:flex; align-items:center; justify-content:center;"><i class="bi bi-wallet2" style="color:#ffffff; font-size:12px;"></i></div><span style="font-weight:700; color:#2d3748; font-size:0.8rem;">Total Paid</span></div><div style="color:#FC5D09; font-weight:850; font-size:0.98rem;">₹' + pAmount + '</div></div>'
                         + '</div>'
-                        + '<button id="swalConfirmOkBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b); color:#ffffff; border:none; border-radius:10px; padding:12px 0; font-weight:700; font-size:0.92rem; cursor:pointer; box-shadow:0 6px 18px rgba(252, 93, 9,0.35); width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">Go to Homepage <i class="bi bi-arrow-right" style="font-size:1rem;"></i></button>'
+                        + '<button id="swalConfirmOkBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b); color:#ffffff; border:none; border-radius:10px; padding:10px 0; font-weight:700; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 14px rgba(252, 93, 9,0.35); width:100%; display:flex; align-items:center; justify-content:center; gap:6px;">Go to Homepage <i class="bi bi-arrow-right" style="font-size:0.95rem;"></i></button>'
                         + '</div>',
                     showConfirmButton: false,
                     allowOutsideClick: false,

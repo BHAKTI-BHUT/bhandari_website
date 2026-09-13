@@ -100,8 +100,32 @@
             }
         },
         "name": "Bhandari Packers And Movers",
-        "rating": 4.9,
+        "rating": 5,
         "reviews": [
+            {
+                "author_name": "Manpreet Gill",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/115023700178337561132\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocL0AcVYCe78exudoHecY2pbN54Fa5ph9RgpVyKlDJJP7LiLgw=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "in the last week",
+                "text": "All good \ud83d\udc4d",
+                "time": 1789120159,
+                "translated": false
+            },
+            {
+                "author_name": "lalit rawat",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/115812881264073122794\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjU0b3sspMPYaHfI6pgj0mlqn_F3l9qBvtuY8XH3nM2H7cWmvgP-=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "in the last week",
+                "text": "Very efficient and fast in delivering the required services.",
+                "time": 1789118394,
+                "translated": false
+            },
             {
                 "author_name": "Bhakti Bhut",
                 "author_url": "https:\/\/www.google.com\/maps\/contrib\/106037838217081735899\/reviews",
@@ -137,34 +161,10 @@
                 "text": "Very nice service and experienced workers\nBoys did a great job\nQuick shifting",
                 "time": 1788784310,
                 "translated": false
-            },
-            {
-                "author_name": "Himanshu Sardana",
-                "author_url": "https:\/\/www.google.com\/maps\/contrib\/116779740638056027723\/reviews",
-                "language": "en",
-                "original_language": "en",
-                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a\/ACg8ocLXPH-fE5-0XDiJ3BqOQ9dKKSs17cIeDbvImO9CgZmTrlJpHg=s128-c0x00000000-cc-rp-mo",
-                "rating": 5,
-                "relative_time_description": "a week ago",
-                "text": "Best packing and moving services will book again",
-                "time": 1788439632,
-                "translated": false
-            },
-            {
-                "author_name": "Aayushi Aggarwal",
-                "author_url": "https:\/\/www.google.com\/maps\/contrib\/112187060726316434866\/reviews",
-                "language": "en",
-                "original_language": "en",
-                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjWQPPR4d_6I0fkZitK1J6-9TCkYeapPFtMhRosKOYX6OVLh3VTh=s128-c0x00000000-cc-rp-mo",
-                "rating": 5,
-                "relative_time_description": "a week ago",
-                "text": "Great experience, very helpful with everything, helped a lot with shifting",
-                "time": 1788256117,
-                "translated": false
             }
         ],
         "url": "https:\/\/maps.google.com\/?cid=11321227447965075053",
-        "user_ratings_total": 19
+        "user_ratings_total": 21
     },
     "status": "OK"
 }

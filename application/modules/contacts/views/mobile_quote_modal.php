@@ -236,29 +236,6 @@ $user_mobile_val = ($logged_web_user && !empty($logged_web_user['mobile'])) ? ht
                         <input type="date" name="date" id="mqm_date" style="color:#c70000;">
                     </div>
 
-                    <!-- Shifting Time -->
-                    <div class="mqm-field">
-                        <span class="mqm-icon icon-time"><i class="bi bi-clock"></i></span>
-                        <?php
-                          $mqm_time_options = array(
-                              "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
-                              "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-                              "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
-                              "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
-                              "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM",
-                              "09:00 PM", "09:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
-                              "12:00 AM", "12:30 AM", "01:00 AM", "01:30 AM", "02:00 AM", "02:30 AM",
-                              "03:00 AM", "03:30 AM", "04:00 AM", "04:30 AM", "05:00 AM", "05:30 AM"
-                          );
-                        ?>
-                        <select name="shifting_time" id="mqm_time" style="color:#c70000; font-size:0.95rem; font-weight:600; width:100%; border:none; background:transparent; outline:none;" required>
-                            <option value="" selected>Select Time Slot (12-Hour)</option>
-                            <?php foreach ($mqm_time_options as $t_opt): ?>
-                                <option value="<?= $t_opt ?>"><?= $t_opt ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
                     <div id="mqmResult"></div>
 
                     <!-- Submit -->
@@ -492,7 +469,6 @@ $(function() {
         var mto   = $('#mqm_drop').val().trim();
         var phone = $('#mqm_phone').val().trim();
         var date  = $('#mqm_date').val().trim();
-        var time  = $('#mqm_time').val().trim();
 
         if (!name || name.length < 2) { Swal.fire({ title:'Name Required', text:'Please enter your full name.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!mfrom) { Swal.fire({ title:'Pickup Required', text:'Please enter pickup location.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
@@ -512,32 +488,6 @@ $(function() {
         if (!mto) { Swal.fire({ title:'Drop Required', text:'Please enter drop location.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!phone || !/^\d{10}$/.test(phone)) { Swal.fire({ title:'Mobile Required', text:'Please enter a valid 10-digit mobile number.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
         if (!date) { Swal.fire({ title:'Date Required', text:'Please select shifting date.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
-        if (!time) { Swal.fire({ title:'Time Required', text:'Please select shifting time.', icon:'warning', confirmButtonColor:'#FC5D09' }); return; }
-
-        var todayStr = getLocalTodayDateStrMqm();
-        if (date === todayStr) {
-            var selMin = parseMqmTimeToMinutes(time);
-            var now = new Date();
-            var nowMin = now.getHours() * 60 + now.getMinutes();
-            var minAllowedMin = nowMin + 120; // +2 hours
-
-            if (selMin >= 0 && selMin < minAllowedMin) {
-                var currentStr = formatMqmMinutesTo12Hour(nowMin);
-                var earliestStr = minAllowedMin >= 1440 
-                    ? 'No time slots left today. Please select tomorrow\'s date.' 
-                    : formatMqmMinutesTo12Hour(minAllowedMin);
-
-                showSleekNoticeModal(
-                    'Advance Booking (2 Hrs Minimum)',
-                    'Orders must be scheduled at least <b>2 hours</b> in advance.<br><br>' +
-                    '• Current Time: <b>' + currentStr + '</b><br>' +
-                    '• Earliest Allowed Today: <b>' + earliestStr + '</b>',
-                    'Select Valid Time',
-                    'time'
-                );
-                return;
-            }
-        }
 
         // Close mobile quote modal first
         var mqmEl = document.getElementById('mobileQuoteModal');
@@ -631,7 +581,8 @@ function submitMobileBooking(isVerified) {
         url: '<?= site_url("contacts/booking") ?>',
         data: formData,
         success: function(data) {
-            if (data == '1') {
+            var res = $.trim(data);
+            if (res == '1') {
                 Swal.fire({
                     html:
                         '<div style="text-align:center;padding:10px 0;">'

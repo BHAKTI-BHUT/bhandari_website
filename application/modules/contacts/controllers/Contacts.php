@@ -19,12 +19,23 @@ class Contacts extends MX_Controller
     function booking()
     {
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('name', 'Name', 'required|trim');
-        $this->form_validation->set_rules('phone', 'Mobile', 'required|trim|numeric|exact_length[10]');
-        /* $this->form_validation->set_rules('email', "Email", 'trim|valid_email'); */
-        $this->form_validation->set_rules('mfrom', 'Mfrom', 'trim');
-        $this->form_validation->set_rules('mto', 'Mto', 'trim');
-        $this->form_validation->set_rules('date', 'date', 'trim');
+        $this->form_validation->set_rules('name', 'Name', 'required|trim', array(
+            'required' => 'Please enter your full name.'
+        ));
+        $this->form_validation->set_rules('phone', 'Mobile', 'required|trim|numeric|exact_length[10]', array(
+            'required'     => 'Please enter a valid 10-digit phone number.',
+            'numeric'      => 'Please enter a valid 10-digit phone number.',
+            'exact_length' => 'Please enter a valid 10-digit phone number.'
+        ));
+        $this->form_validation->set_rules('mfrom', 'Pickup Location', 'required|trim', array(
+            'required' => 'Please enter pickup location.'
+        ));
+        $this->form_validation->set_rules('mto', 'Drop Location', 'required|trim', array(
+            'required' => 'Please enter drop location.'
+        ));
+        $this->form_validation->set_rules('date', 'Shifting Date', 'required|trim', array(
+            'required' => 'Please select shifting date.'
+        ));
         $this->form_validation->set_rules('shifting_time', 'Shifting Time', 'trim');
         if ($this->form_validation->run() == true) {
             $mfrom = $this->input->post('mfrom');

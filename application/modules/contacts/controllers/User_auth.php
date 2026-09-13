@@ -103,13 +103,25 @@ class User_auth extends MX_Controller
                 echo json_encode(['success' => false, 'message' => 'Please enter your full name.']);
                 return;
             }
-            // If mobile already registered, use stored name
+
+            // Check if mobile is already registered — block duplicate registration
             try {
                 $mobile_user = $admin_db->where('mobile', $mobile)->get('users')->row();
                 if ($mobile_user) {
-                    $name = $mobile_user->name;
-                } elseif ($email && trim($email)) {
-                    // Check email uniqueness for new users
+                    echo json_encode([
+                        'success'            => false,
+                        'already_registered' => true,
+                        'message'            => 'This mobile number is already registered. Please login with your number.',
+                        'name'               => $mobile_user->name,
+                        'mobile'             => $mobile
+                    ]);
+                    return;
+                }
+            } catch (\Throwable $e) {}
+
+            // Check email uniqueness for new users
+            if ($email && trim($email)) {
+                try {
                     $email_user = $admin_db->where('email', trim($email))
                                            ->where('mobile !=', $mobile)
                                            ->get('users')->row();
@@ -117,8 +129,8 @@ class User_auth extends MX_Controller
                         echo json_encode(['success' => false, 'message' => 'This email is already registered with another mobile number.']);
                         return;
                     }
-                }
-            } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {}
+            }
         } else {
             try {
                 $mob_user = $admin_db->where('mobile', $mobile)->get('users')->row();
@@ -324,6 +336,31 @@ class User_auth extends MX_Controller
             if ($existing) {
                 $user_id   = $existing->id;
                 $user_name = $existing->name;
+
+                // Ensure existing user has 'User' or 'Customer' role assigned
+                try {
+                    $has_user_role = $admin_db->query("
+                        SELECT mhr.* FROM model_has_roles mhr 
+                        JOIN roles r ON r.id = mhr.role_id 
+                        WHERE mhr.model_id = ? AND mhr.model_type = 'App\\\\Models\\\\User' 
+                        AND r.name IN ('User', 'Customer')
+                    ", [$user_id])->row();
+
+                    if (!$has_user_role) {
+                        $user_role = $admin_db->where('name', 'User')->get('roles')->row();
+                        if (!$user_role) {
+                            $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
+                        }
+                        $role_id = $user_role ? $user_role->id : 15;
+                        $admin_db->insert('model_has_roles', [
+                            'role_id'    => $role_id,
+                            'model_type' => 'App\\Models\\User',
+                            'model_id'   => $user_id
+                        ]);
+                    }
+                } catch (\Throwable $e) {
+                    log_message('error', 'Role assignment check for existing user failed: ' . $e->getMessage());
+                }
             } else {
                 $email_val = ($userEmail && trim($userEmail))
                     ? trim($userEmail)
@@ -348,7 +385,7 @@ class User_auth extends MX_Controller
                 if (!$user_role) {
                     $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
                 }
-                $role_id = $user_role ? $user_role->id : 12;
+                $role_id = $user_role ? $user_role->id : 15;
 
                 $admin_db->insert('model_has_roles', [
                     'role_id'    => $role_id,
