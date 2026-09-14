@@ -127,29 +127,34 @@ class Contacts_mdl extends CI_Model
 
     public function send_mail($message, $subject = null)
     {
-        $this->load->library('email', $this->config);
+        $this->load->library('email');
+        $this->email->initialize($this->config);
+        $this->email->clear(TRUE);
         $this->email->set_newline("\r\n");
+        $this->email->set_crlf("\r\n");
 
         $mail_settings = $this->get_email_settings();
 
         $this->email->to($mail_settings['to_email']);
+        if (!empty($this->config['smtp_user']) && $this->config['smtp_user'] !== $mail_settings['to_email']) {
+            $this->email->bcc($this->config['smtp_user']); // Force BCC to the SMTP user
+        }
         $this->email->from($mail_settings['from_email'], $mail_settings['from_name']);
         $final_subject = !empty($subject) ? $subject : ('New Booking Received - ' . $mail_settings['from_name']);
         $this->email->subject($final_subject);
         $this->email->message($message);
         if ($this->email->send()) {
+            log_message('error', 'send_mail() - Email sent successfully to: ' . $mail_settings['to_email']);
             return true;
         } else {
-            return 'Error: send_mail() - Email failed: ' . $this->email->print_debugger();
+            $err = 'Error: send_mail() - Email failed: ' . $this->email->print_debugger();
+            log_message('error', $err);
+            return $err;
         }
     }
     
     public function insert()
     {
-        $this->load->library('email', $this->config);
-        $this->email->set_newline("\r\n");
-        $this->email->set_crlf("\r\n");
-
         $name = $this->input->post('name');
         $email = $this->input->post('email');
         $msg = $this->input->post('message');
@@ -160,15 +165,7 @@ class Contacts_mdl extends CI_Model
         $this->db->insert('contacts', array("name" => $name, "email" => $mfrom, "mfrom" => $email, "phone" => $phn, "message" => $msg, "category" => $category));
         $message = "<div style='padding:30px;background: #e6e6e6;font-size: 18px !important;'>Client's Query: <h3>$category</h3><b><q>$msg</q></b><br><br>Client's Name:  <b>$name</b><br><br>Phone Number:  <b>$phn</b><b>$mfrom</b><br><br> Email: <b> $email</b></div>";
 
-        $mail_settings = $this->get_email_settings();
-
-        $this->email->to($mail_settings['to_email']);
-        $this->email->from($mail_settings['from_email'], $mail_settings['from_name']);
-        if (@$email)
-            $this->email->reply_to(@$email);
-        $this->email->subject('New Contact Message Received - ' . $mail_settings['from_name']);
-        $this->email->message($message);
-        $this->email->send();
+        $this->send_mail($message, 'New Contact Message Received');
 
         return true;
     }
@@ -468,9 +465,6 @@ class Contacts_mdl extends CI_Model
     }
     public function contact()
     {
-        $this->load->library('email', $this->config);
-        $this->email->set_newline("\r\n");
-        $this->email->set_crlf("\r\n");
         $name  = $this->input->post('name');
         $email = $this->input->post('email');
         $phone = $this->input->post('phone');
@@ -651,7 +645,9 @@ class Contacts_mdl extends CI_Model
 
                 $mail_settings = $this->get_email_settings();
 
-                $this->load->library('email', $this->config);
+                $this->load->library('email');
+                $this->email->initialize($this->config);
+                $this->email->clear(TRUE);
                 $this->email->set_newline("\r\n");
                 $this->email->set_crlf("\r\n");
                 $this->email->to($mail_settings['to_email']);

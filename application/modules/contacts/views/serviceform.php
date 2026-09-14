@@ -491,10 +491,13 @@
 .back-to-login:hover { color: #FC5D09; }
 /* ─── OTP MODAL Z-INDEX FIX ─── */
 #quoteOtpModal {
-    z-index: 10050 !important;
+    z-index: 10550 !important;
 }
 #quoteOtpModal .modal-dialog {
-    z-index: 10055 !important;
+    z-index: 10555 !important;
+}
+#quoteOtpModal ~ .modal-backdrop {
+    z-index: 10540 !important;
 }
 </style>
 
@@ -672,12 +675,19 @@
                     <i class="bi bi-check-circle-fill me-1"></i> Verify OTP & Submit
                 </button>
 
-                <!-- Resend OTP -->
-                <div class="mt-2" style="font-size:0.83rem; color:#888;">
-                    Didn't receive OTP?
-                    <button type="button" id="btnResendQuoteOtp" onclick="resendQuoteOtp()" style="background:none;border:none;color:#FC5D09;font-weight:700;cursor:pointer;padding:0;font-size:0.83rem;">
-                        Resend OTP
-                    </button>
+                <!-- Resend OTP & Skip OTP Row -->
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top" style="font-size:0.83rem;">
+                    <div>
+                        <span class="text-muted">Didn't receive OTP?</span>
+                        <button type="button" id="btnResendQuoteOtp" onclick="resendQuoteOtp()" style="background:none;border:none;color:#FC5D09;font-weight:700;cursor:pointer;padding:0;font-size:0.83rem;margin-left:2px;">
+                            Resend
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" id="btnSkipQuoteOtp" class="btn btn-link text-decoration-none p-0 fw-bold text-secondary" style="font-size:0.83rem;color:#6c757d;">
+                            Skip OTP <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -828,8 +838,6 @@ $(function () {
         }
     });
 
-
-
     // Hide T&C error on checkbox change
     $('#tc_agree_checkbox').on('change', function () {
         if ($(this).is(':checked')) {
@@ -964,16 +972,6 @@ $(function () {
             localStorage.setItem('bhandari_booking_draft', JSON.stringify(bDraft));
         } catch(e) {}
 
-        // Show success alert instantly on click
-        Swal.fire({
-            title: '✅ Perfect!',
-            text: "Now, let’s select your items.",
-            icon: 'success',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true
-        });
-
         // 1. Silent Background Submission to Admin immediately
         const formData = $('#service_form').serialize() + '&is_verified=0';
         $.ajax({
@@ -985,8 +983,16 @@ $(function () {
             }
         });
 
-        // 2. If user is already logged in, redirect directly to success page
+        // 2. If user is already logged in, redirect directly to item selection
         if (_isLoggedIn) {
+            Swal.fire({
+                title: '✅ Perfect!',
+                text: "Now, let’s select your items.",
+                icon: 'success',
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
             setTimeout(function() {
                 window.location.href = '<?= site_url("online-booking?status=success") ?>';
             }, 1000);
@@ -1018,34 +1024,34 @@ $(function () {
                 .then(function(data) {
                     if (data && data.type === 'success' && data.message) {
                         _quoteOtpReqId = data.message;
-                        $('#quoteOtpMaskedMobile').text('+91 \u2022\u2022\u2022\u2022\u2022\u2022' + phone.slice(-4));
-                        $('.quote-otp-digit').val('').removeClass('filled');
-                        $('#quoteOtpError').addClass('d-none').text('');
-                        var modal = new bootstrap.Modal(document.getElementById('quoteOtpModal'));
-                        modal.show();
                     } else {
-                        // Fallback: open modal anyway (server-side OTP was also sent as backup)
                         _quoteOtpReqId = '';
-                        $('#quoteOtpMaskedMobile').text('+91 \u2022\u2022\u2022\u2022\u2022\u2022' + phone.slice(-4));
-                        $('.quote-otp-digit').val('').removeClass('filled');
-                        $('#quoteOtpError').addClass('d-none').text('');
-                        var modal = new bootstrap.Modal(document.getElementById('quoteOtpModal'));
-                        modal.show();
                     }
-                })
-                .catch(function() {
-                    // Even on network error, open modal — server already stored OTP in session
-                    _quoteOtpReqId = '';
+                    // Close any leftover Swal overlay before opening Bootstrap modal
+                    if (typeof Swal !== 'undefined') Swal.close();
                     $('#quoteOtpMaskedMobile').text('+91 \u2022\u2022\u2022\u2022\u2022\u2022' + phone.slice(-4));
                     $('.quote-otp-digit').val('').removeClass('filled');
                     $('#quoteOtpError').addClass('d-none').text('');
+                    // Remove any stale backdrops
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css({'overflow':'','padding-right':''});
+                    var modal = new bootstrap.Modal(document.getElementById('quoteOtpModal'));
+                    modal.show();
+                })
+                .catch(function() {
+                    _quoteOtpReqId = '';
+                    if (typeof Swal !== 'undefined') Swal.close();
+                    $('#quoteOtpMaskedMobile').text('+91 \u2022\u2022\u2022\u2022\u2022\u2022' + phone.slice(-4));
+                    $('.quote-otp-digit').val('').removeClass('filled');
+                    $('#quoteOtpError').addClass('d-none').text('');
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css({'overflow':'','padding-right':''});
                     var modal = new bootstrap.Modal(document.getElementById('quoteOtpModal'));
                     modal.show();
                 });
             },
             error: function () {
-                // Network fail: redirect directly
-                window.location.href = '<?= site_url("online-booking?status=success") ?>';
+                Swal.fire({ title: 'Connection Error', text: 'Unable to send OTP. Please try again.', icon: 'error', confirmButtonColor: '#FC5D09' });
             }
         });
     });
@@ -1155,15 +1161,19 @@ function resendQuoteOtp() {
 
 // ─── Submit Booking (Free Quote Inquiry) ──────────────────────────────────
 function submitBooking(isVerified) {
-    Swal.fire({
-        title: '✅ Perfect!',
-        text: "Now, let’s select your items.",
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        didOpen: function() { Swal.showLoading(); }
-    });
+    var isVer = (isVerified === 1 || isVerified === '1');
+    
+    if (isVer) {
+        Swal.fire({
+            title: '✅ Verification Successful!',
+            text: "Now, let’s select your items.",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: function() { Swal.showLoading(); }
+        });
+    }
 
-    const formData = $('#service_form').serialize() + '&is_verified=' + (isVerified || 0);
+    const formData = $('#service_form').serialize() + '&is_verified=' + (isVer ? '1' : '0');
 
     $.ajax({
         type: 'POST',
@@ -1172,11 +1182,24 @@ function submitBooking(isVerified) {
         success: function (data) {
             var trimmedData = (typeof data === 'string') ? data.trim() : String(data).trim();
             if (trimmedData === '1' || trimmedData.indexOf('1') === 0) {
-                // Redirect immediately with success status query parameter
-                window.location.href = '<?= site_url("online-booking?status=success") ?>';
                 $('#service_form')[0].reset();
                 var today = (function() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); })();
-                document.getElementById('service_shifting_date').value = today;
+                var dateEl = document.getElementById('service_shifting_date');
+                if (dateEl) dateEl.value = today;
+
+                if (isVer) {
+                    // Verified user: proceed to item selection page
+                    window.location.href = '<?= site_url("online-booking?status=success") ?>';
+                } else {
+                    // Unverified / Skipped OTP: stay on home page and show confirmation alert
+                    Swal.fire({
+                        title: 'Quote Request Received! 🙏',
+                        html: 'Thank you for your request! Our team will review your moving details and contact you shortly.',
+                        icon: 'success',
+                        confirmButtonText: 'OK, Got It',
+                        confirmButtonColor: '#FC5D09'
+                    });
+                }
             } else {
                 var cleanMsg = $('<div>').html(data).text().trim() || data;
                 Swal.fire({

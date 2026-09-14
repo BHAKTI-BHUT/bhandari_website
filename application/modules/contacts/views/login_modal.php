@@ -6,8 +6,8 @@
      ═══════════════════════════════════════════ -->
 <style>
 /* ─── Shared OTP Login Modal CSS ─── */
-#otpLoginModal { z-index: 10050 !important; }
-#otpLoginModal .modal-dialog { max-width: 440px; z-index: 10055 !important; }
+#otpLoginModal { z-index: 10600 !important; }
+#otpLoginModal .modal-dialog { max-width: 440px; z-index: 10605 !important; }
 #otpLoginModal .modal-content {
     border: none;
     border-radius: 0;
@@ -366,6 +366,14 @@ if (typeof _pendingSubmit === 'undefined') { var _pendingSubmit = false; }
 $(function () {
     // Append modal to body to fix unclickable z-index issues on mobile
     $('#otpLoginModal').appendTo('body');
+
+    // Force backdrop z-index when login modal opens
+    $('#otpLoginModal').on('shown.bs.modal', function () {
+        // Find the backdrop that belongs to this modal and set its z-index
+        setTimeout(function() {
+            $('.modal-backdrop').last().css('z-index', '10590');
+        }, 10);
+    });
 
     // ─── OTP digit box auto-advance ───
     $('.otp-digit').on('input', function () {

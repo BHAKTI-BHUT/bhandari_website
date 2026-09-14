@@ -1,4 +1,4 @@
-    <?php if (! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 class Contacts extends MX_Controller
 {
     function __construct()
@@ -6,7 +6,20 @@ class Contacts extends MX_Controller
         parent::__construct();
         $this->load->database();
     }
-    function index()
+
+    public function test_email_cli()
+    {
+        $this->load->model('Contacts_mdl');
+        $res = $this->Contacts_mdl->send_mail("This is a test message from CLI", "Test Subject");
+        if ($res === true) {
+            echo "SUCCESS\n";
+        } else {
+            echo "FAILED:\n" . $res . "\n";
+        }
+        exit;
+    }
+
+    public function index()
     {
         $data['title'] = "Bhandari Packers and Movers | Trusted Relocation & Shifting Services in India";
         $data['description'] = "Bhandari Packers and Movers offers reliable, affordable, and safe relocation services across India. We specialize in household shifting, office moving, vehicle transport, and packing services with complete customer satisfaction.";
@@ -145,6 +158,14 @@ class Contacts extends MX_Controller
 
     public function online_booking()
     {
+        // Only verified users with active session can access online booking
+        $web_user = $this->session->userdata('web_user');
+        if (!$web_user) {
+            $this->session->set_flashdata('error_msg', 'Please verify your mobile number with OTP to access online booking.');
+            redirect(site_url());
+            return;
+        }
+
         // Fetch active items and addons from admin database
         try {
             $admin_db = $this->load->database('admin_hub', TRUE);

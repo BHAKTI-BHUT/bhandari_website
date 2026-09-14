@@ -104,16 +104,24 @@ class User_auth extends MX_Controller
                 return;
             }
 
-            // Check if mobile is already registered — block duplicate registration
+            // Check if mobile is already registered — allow OTP sending for existing users as well
             try {
                 $mobile_user = $admin_db->where('mobile', $mobile)->get('users')->row();
                 if ($mobile_user) {
+                    $name = ($name && strlen(trim($name)) >= 2) ? trim($name) : $mobile_user->name;
+                    $this->session->set_userdata('otp_pending', [
+                        'name'    => $name,
+                        'email'   => $email ?: $mobile_user->email,
+                        'mobile'  => $mobile,
+                        'sent_at' => time()
+                    ]);
                     echo json_encode([
-                        'success'            => false,
+                        'success'            => true,
                         'already_registered' => true,
-                        'message'            => 'This mobile number is already registered. Please login with your number.',
-                        'name'               => $mobile_user->name,
-                        'mobile'             => $mobile
+                        'message'            => 'OTP ready.',
+                        'name'               => $name,
+                        'mobile'             => $mobile,
+                        'mobile91'           => '91' . $mobile
                     ]);
                     return;
                 }

@@ -1,3 +1,21 @@
+<?php
+$logged_web_user = $this->session->userdata('web_user');
+$user_name_val   = ($logged_web_user && !empty($logged_web_user['name'])) ? htmlspecialchars($logged_web_user['name']) : '';
+$user_mobile_val = ($logged_web_user && !empty($logged_web_user['mobile'])) ? htmlspecialchars($logged_web_user['mobile']) : (isset($logged_web_user['phone']) ? htmlspecialchars($logged_web_user['phone']) : '');
+$user_email_val  = ($logged_web_user && !empty($logged_web_user['email'])) ? htmlspecialchars($logged_web_user['email']) : '';
+
+if ($logged_web_user && empty($user_email_val) && !empty($logged_web_user['id'])) {
+    try {
+        $admin_db = $this->load->database('admin_hub', TRUE);
+        if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('users')) {
+            $user_rec = $admin_db->where('id', $logged_web_user['id'])->get('users')->row();
+            if ($user_rec && !empty($user_rec->email) && strpos($user_rec->email, '@bhandari.guest') === false) {
+                $user_email_val = htmlspecialchars($user_rec->email);
+            }
+        }
+    } catch (\Exception $e) {}
+}
+?>
 <div class="col-md-6 mb-4">
     <h5 class="fw-bold mb-4 text-center">Request a Free Quote Today!</h5>
     <form class="border p-4 rounded shadow-sm bg-light" id="pageform" onsubmit="return false;" novalidate>
@@ -7,7 +25,7 @@
         <div class="col-md-6 mb-3">
             <div class="input-group" id="pg-name-group">
                 <span class="input-group-text bg-danger"><i class="bi bi-person-fill text-white"></i></span>
-                <input type="text" id="pg-name" name="name" class="form-control" placeholder="Your Name">
+                <input type="text" id="pg-name" name="name" class="form-control" placeholder="Your Name" value="<?= $user_name_val ?>">
             </div>
             <div class="pgf-error d-none" id="pg-name-err">
                 <small class="text-danger"><i class="bi bi-exclamation-circle-fill me-1"></i>Please enter your full name.</small>
@@ -17,7 +35,7 @@
         <div class="col-md-6 mb-3">
             <div class="input-group" id="pg-phone-group">
                 <span class="input-group-text bg-danger"><i class="bi bi-telephone-fill text-white"></i></span>
-                <input type="text" id="pg-phone" name="phone" class="form-control" placeholder="Mobile Number" maxlength="10" inputmode="numeric">
+                <input type="text" id="pg-phone" name="phone" class="form-control" placeholder="Mobile Number" maxlength="10" inputmode="numeric" value="<?= $user_mobile_val ?>">
             </div>
             <div class="pgf-error d-none" id="pg-phone-err">
                 <small class="text-danger"><i class="bi bi-exclamation-circle-fill me-1"></i>Please enter a valid 10-digit mobile number.</small>
@@ -29,7 +47,7 @@
     <div class="mb-3">
         <div class="input-group" id="pg-email-group">
             <span class="input-group-text bg-danger"><i class="bi bi-envelope-fill text-white"></i></span>
-            <input type="email" id="pg-email" name="email" class="form-control" placeholder="Your Email">
+            <input type="email" id="pg-email" name="email" class="form-control" placeholder="Your Email" value="<?= $user_email_val ?>">
         </div>
         <div class="pgf-error d-none" id="pg-email-err">
             <small class="text-danger"><i class="bi bi-exclamation-circle-fill me-1"></i>Please enter a valid email address.</small>
