@@ -77,6 +77,15 @@ class MX_Controller
         $this->comp['postalCode'] = "201301";
         $this->comp['companystate'] = "Uttar Pradesh";
         $this->comp['themeColor'] = "#FC5D09";
+        
+        $this->comp['company_description'] = 'Providing reliable and efficient packing and moving services across India since 2005. Your trust is our priority.';
+        $this->comp['quick_links'] = [
+            ['title' => 'About Us', 'url' => 'about'],
+            ['title' => 'Home', 'url' => ''],
+            ['title' => 'Contact', 'url' => 'contacts'],
+            ['title' => 'Branches', 'url' => 'branches'],
+            ['title' => 'Cancellation & Refund Policy', 'url' => 'cancellation-refund']
+        ];
 
         $this->comp['facebookhtml'] = "https://www.facebook.com/share/1ZqpTWpfwE/";
         $this->comp['youtubehtml'] = "https://youtube.com/@bhandaripackersandmovers?si=zB430aIlN8su81TU";
@@ -132,6 +141,15 @@ class MX_Controller
                 }
                 if (!empty($db_settings['postal_code'])) {
                     $this->comp['postalCode'] = $db_settings['postal_code'];
+                }
+                if (!empty($db_settings['company_description'])) {
+                    $this->comp['company_description'] = $db_settings['company_description'];
+                }
+                if (!empty($db_settings['quick_links'])) {
+                    $decoded_links = json_decode($db_settings['quick_links'], true);
+                    if (is_array($decoded_links) && !empty($decoded_links)) {
+                        $this->comp['quick_links'] = $decoded_links;
+                    }
                 }
 
                 if (isset($db_settings['social_facebook'])) {

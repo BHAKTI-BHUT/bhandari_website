@@ -4,8 +4,8 @@
     $user_mobile_val = ($logged_web_user && !empty($logged_web_user['mobile'])) ? htmlspecialchars($logged_web_user['mobile']) : '';
     $today_date      = date('Y-m-d');
 ?>
-<div class="modal fade" id="qteModal" tabindex="-1" aria-labelledby="qteModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="qteModal" tabindex="-1" aria-labelledby="qteModalLabel" aria-hidden="true" style="z-index: 99999 !important;">
+  <div class="modal-dialog modal-lg modal-dialog-centered" style="pointer-events: auto !important;">
     <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden w-100">
       <div class="modal-header bg-danger text-white">
         <span class="modal-title fw-bold fs-6">

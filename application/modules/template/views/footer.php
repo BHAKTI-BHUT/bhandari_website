@@ -10,13 +10,21 @@ $f_phonehtml      = !empty($phonehtml) ? $phonehtml : 'tel:+917303257332';
 $f_mail           = !empty($mail) ? $mail : 'info@bhandaripackersandmovers.in';
 $f_mailhtml       = !empty($mailhtml) ? $mailhtml : 'mailto:info@bhandaripackersandmovers.in';
 $f_businessHours  = !empty($businessHours) ? $businessHours : 'Mon-Sat: 9AM - 6PM';
+$f_company_description = !empty($company_description) ? $company_description : 'Providing reliable and efficient packing and moving services across India since 2005. Your trust is our priority.';
+$f_quick_links    = !empty($quick_links) ? $quick_links : [
+    ['title' => 'About Us', 'url' => 'about'],
+    ['title' => 'Home', 'url' => ''],
+    ['title' => 'Contact', 'url' => 'contacts'],
+    ['title' => 'Branches', 'url' => 'branches'],
+    ['title' => 'Cancellation & Refund Policy', 'url' => 'cancellation-refund']
+];
 ?>
     <footer style="background: linear-gradient(180deg, #0B2562 0%, #001C66 100%); color: #ffffff;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <span class="text-white fs-3"><?= htmlspecialchars($f_company3) ?></span>
-                    <p class="text-white mt-4">Providing reliable and efficient packing and moving services across India since 2005. Your trust is our priority.</p>
+                    <p class="text-white mt-4"><?= htmlspecialchars($f_company_description) ?></p>
                     <div class="mt-3">
                         <?php if (!empty($f_facebookhtml)): ?>
                         <a href="<?= htmlspecialchars($f_facebookhtml) ?>" target="_blank" aria-label="facebook" class="social-icon me-2"><i class="bi bi-facebook"></i></a>
@@ -32,11 +40,15 @@ $f_businessHours  = !empty($businessHours) ? $businessHours : 'Mon-Sat: 9AM - 6P
                 <div class="col-lg-2 col-md-4 col-6 mb-4">
                     <span class="text-white fs-2 mb-4">Quick Links</span>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="<?=site_url('about')?>" class="footer-link baad">About Us</a></li>
-                        <li class="mb-2"><a href="<?=site_url()?>" class="footer-link baad">Home</a></li>
-                        <li class="mb-2"><a href="<?=site_url('contacts')?>" class="footer-link baad">Contact</a></li>
-                        <li class="mb-2"><a href="<?=site_url('branches')?>" class="footer-link baad">Branches</a></li>
-                        <li class="mb-2"><a href="<?=site_url('cancellation-refund')?>" class="footer-link baad">Cancellation &amp; Refund Policy</a></li>
+                        <?php foreach($f_quick_links as $qlink): ?>
+                            <?php 
+                                $url = $qlink['url'];
+                                if(strpos($url, 'http://') !== 0 && strpos($url, 'https://') !== 0) {
+                                    $url = site_url($url);
+                                }
+                            ?>
+                            <li class="mb-2"><a href="<?= $url ?>" class="footer-link baad"><?= htmlspecialchars($qlink['title']) ?></a></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
 <?php
