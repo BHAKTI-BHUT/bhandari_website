@@ -40,7 +40,7 @@ $grid_desc = (!empty($page_setting) && !empty($page_setting->grid_description)) 
             </div>
             <div class="col-lg-6 animate delay-1">
                 <h2 class="section-title text-start text-dark mb-4"><?= htmlspecialchars($page_title) ?></h2>
-                <div class="lead fw-semibold fst-italic text-dark mb-3">
+                <div class="text-dark mb-3">
                     <?= $main_desc ?>
                 </div>
                 <div class="row mt-4">
@@ -53,7 +53,7 @@ $grid_desc = (!empty($page_setting) && !empty($page_setting->grid_description)) 
                                     </div>
                                     <div>
                                         <p class="mb-1 text-danger"><strong><?= htmlspecialchars($item->title) ?></strong></p>
-                                        <p class="mb-0 fst-italic text-dark"><?= htmlspecialchars($item->description) ?></p>
+                                        <p class="mb-0 text-dark"><?= htmlspecialchars($item->description) ?></p>
                                     </div>
                                 </div>
                             </div>

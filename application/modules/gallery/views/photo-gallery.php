@@ -86,7 +86,7 @@
   margin-bottom: 48px;
 }
 .pg-heading {
-  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
   font-size: clamp(1.6rem, 3vw, 2.4rem);
   font-weight: 700;
   color: #1a1a2e;
@@ -148,7 +148,7 @@
   padding: 28px 14px 12px;
   background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 100%);
   color: #fff;
-  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
   font-size: .82rem;
   font-weight: 600;
   letter-spacing: .3px;
@@ -209,7 +209,7 @@
   color: rgba(255,255,255,.78);
   font-size: .9rem;
   margin-top: 12px;
-  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
 }
 
 .pg-lightbox-close {

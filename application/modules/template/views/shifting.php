@@ -152,7 +152,7 @@
   letter-spacing: 2px;
 }
 .process-title {
-  font-family: 'Montserrat', sans-serif;
+  font-weight: 500;
   font-size: 28px;
 }
 .title-divider {

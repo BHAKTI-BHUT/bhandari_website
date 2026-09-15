@@ -13,7 +13,7 @@
     </nav>
   </div>
 </section>
-<section class="container py-5" style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+<section class="container py-5">
   <div class="row">
     <?php $this->view('contacts/pageform.php'); ?>
     <div class="col-md-6 d-flex flex-column justify-content-center">
@@ -71,7 +71,7 @@
     .about-content p,
     .about-content b,
     .about-content span {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+
     }
     .color{
       color:#FC5D09;
