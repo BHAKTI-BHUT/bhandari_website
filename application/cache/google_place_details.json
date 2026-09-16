@@ -99,6 +99,7 @@
                 }
             }
         },
+        "international_phone_number": "+91 73032 57332",
         "name": "Bhandari Packers And Movers",
         "rating": 5,
         "reviews": [
@@ -127,6 +128,30 @@
                 "translated": false
             },
             {
+                "author_name": "Goldy negi vlogs",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/104058608777291596340\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjUtuatgzfCrmLG3CalT4xc4DMQ0dzfPFdwsaFNv6EDJKkhLlQg=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "3 weeks ago",
+                "text": "Very reasonable service. I'm very happy to move my home with Bhandari Packers. Thanks \ud83d\ude0a",
+                "time": 1787287313,
+                "translated": false
+            },
+            {
+                "author_name": "Ajay Mahi",
+                "author_url": "https:\/\/www.google.com\/maps\/contrib\/116351071867463329489\/reviews",
+                "language": "en",
+                "original_language": "en",
+                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjWNjpygxy0HFngEdPQWmOz9D40cuxqGier2Cmu0Cb0jt9-seCY5=s128-c0x00000000-cc-rp-mo",
+                "rating": 5,
+                "relative_time_description": "2 weeks ago",
+                "text": "Good experience bhandari packers and movers",
+                "time": 1787795178,
+                "translated": false
+            },
+            {
                 "author_name": "Manpreet Gill",
                 "author_url": "https:\/\/www.google.com\/maps\/contrib\/115023700178337561132\/reviews",
                 "language": "en",
@@ -136,30 +161,6 @@
                 "relative_time_description": "in the last week",
                 "text": "All good \ud83d\udc4d",
                 "time": 1789120159,
-                "translated": false
-            },
-            {
-                "author_name": "lalit rawat",
-                "author_url": "https:\/\/www.google.com\/maps\/contrib\/115812881264073122794\/reviews",
-                "language": "en",
-                "original_language": "en",
-                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjU0b3sspMPYaHfI6pgj0mlqn_F3l9qBvtuY8XH3nM2H7cWmvgP-=s128-c0x00000000-cc-rp-mo",
-                "rating": 5,
-                "relative_time_description": "in the last week",
-                "text": "Very efficient and fast in delivering the required services.",
-                "time": 1789118394,
-                "translated": false
-            },
-            {
-                "author_name": "Bhakti Bhut",
-                "author_url": "https:\/\/www.google.com\/maps\/contrib\/106037838217081735899\/reviews",
-                "language": "en",
-                "original_language": "en",
-                "profile_photo_url": "https:\/\/lh3.googleusercontent.com\/a-\/ALV-UjVFZ_MRFzhR-LotdFO4j39m28i1ZGTyzJ28vOy06QgOFzFYY9Ly=s128-c0x00000000-cc-rp-mo",
-                "rating": 5,
-                "relative_time_description": "in the last week",
-                "text": "One of the best moving experiences I have had. Bhandari Packers and Movers provided professional packing, safe transportation, careful loading and unloading, and timely delivery. The team was polite and responsive throughout the relocation. I highly recommend Bhandari Packers and Movers for home shifting, office relocation, and packing and moving services.",
-                "time": 1788969743,
                 "translated": false
             }
         ],

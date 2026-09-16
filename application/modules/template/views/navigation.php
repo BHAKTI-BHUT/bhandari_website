@@ -33,9 +33,10 @@ try {
   // Navbar me user login state check (CI session)
   $nav_user = $this->session->userdata('web_user');
   $nav_logged_in = !empty($nav_user);
-  $nav_name = $nav_logged_in ? $nav_user['name'] : '';
+  $nav_name = $nav_logged_in ? ($nav_user['name'] ?? '') : '';
+  $nav_mobile = $nav_logged_in ? ($nav_user['mobile'] ?? '') : '';
   // Avatar: first letter of name
-  $nav_initial = $nav_logged_in ? strtoupper(substr($nav_name, 0, 1)) : '';
+  $nav_initial = $nav_logged_in ? strtoupper(substr($nav_name ?: ($nav_mobile ?: '?'), 0, 1)) : '';
 ?>
 <style>
 /* ─── Top Bar Styling & Mobile Smooth Ticker Scroll ─── */
@@ -226,7 +227,7 @@ try {
     font-size: 0.82rem;
     font-weight: 700;
     color: #222;
-    max-width: 90px;
+    max-width: 110px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -235,57 +236,79 @@ try {
 }
 .nav-user-name small {
     display: block;
-    font-weight: 400;
-    color: #888;
-    font-size: 0.7rem;
+    font-weight: 500;
+    color: #666;
+    font-size: 0.68rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .nav-user-dropdown {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    min-width: 180px;
+    min-width: 220px;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    box-shadow: 0 10px 35px rgba(0,0,0,0.15);
     z-index: 2000;
     overflow: hidden;
     display: none;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #eee;
 }
 .nav-user-dropdown.open { display: block; animation: ddFadeIn 0.18s ease; }
 @keyframes ddFadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 .nav-user-dropdown .dd-header {
     background: linear-gradient(135deg, #FC5D09, #ff4b2b);
-    padding: 14px 16px 12px;
+    padding: 14px 16px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 .nav-user-dropdown .dd-header .dd-avatar {
-    width: 38px; height: 38px;
+    width: 42px; height: 42px;
     border-radius: 50%;
     background: rgba(255,255,255,0.25);
     color: #fff;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.5);
 }
 .nav-user-dropdown .dd-header .dd-info { flex: 1; min-width: 0; }
 .nav-user-dropdown .dd-header .dd-info strong {
     display: block;
-    font-size: 0.88rem;
+    font-size: 0.92rem;
     color: #fff;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.25;
 }
-.nav-user-dropdown .dd-header .dd-info span {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.82);
+.nav-user-dropdown .dd-header .dd-info .dd-mobile {
+    font-size: 0.76rem;
+    color: rgba(255,255,255,0.95);
+    font-weight: 600;
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.nav-user-dropdown .dd-header .dd-info .dd-role {
+    display: inline-block;
+    font-size: 0.65rem;
+    color: #fff;
+    background: rgba(0,0,0,0.18);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-top: 3px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 .nav-user-dropdown .dd-item {
     display: flex;
@@ -414,7 +437,7 @@ try {
                         <div class="nav-user-avatar" id="navUserAvatar"><?= $nav_initial ?></div>
                         <span class="nav-user-name d-none d-md-block" id="navUserNameEl">
                             <?= htmlspecialchars($nav_name) ?>
-                            <small>Member</small>
+                            <small id="navUserMobileSub"><?= !empty($nav_mobile) ? '+91 ' . htmlspecialchars($nav_mobile) : '' ?></small>
                         </span>
                         <i class="bi bi-chevron-down text-muted" style="font-size:11px;"></i>
                     </div>
@@ -431,7 +454,10 @@ try {
                             <div class="dd-avatar" id="navDdAvatar"><?= $nav_initial ?></div>
                             <div class="dd-info">
                                 <strong id="navDdName"><?= htmlspecialchars($nav_name) ?></strong>
-                                <span>Member</span>
+                                <div class="dd-mobile" id="navDdMobile">
+                                    <i class="bi bi-phone"></i> <?= !empty($nav_mobile) ? '+91 ' . htmlspecialchars($nav_mobile) : '' ?>
+                                </div>
+                                <!-- <span class="dd-role">Member</span> -->
                             </div>
                         </div>
                         <a href="<?= site_url('my-bookings') ?>" class="dd-item">
@@ -503,10 +529,11 @@ function doNavLogout() {
 }
 
 // ─── Update navbar from booking form JS (after OTP login) ─────────────────
-function navSetLoggedIn(name) {
+function navSetLoggedIn(name, mobile) {
     var wrap = document.getElementById('navUserWrap');
     if (!wrap) return;
-    var initial = name ? name.charAt(0).toUpperCase() : '?';
+    var initial = name ? name.charAt(0).toUpperCase() : (mobile ? mobile.charAt(0) : '?');
+    var mobileText = mobile ? '+91 ' + mobile : '';
 
     // Replace login button with avatar+name
     var loginBtn = document.getElementById('navLoginBtn');
@@ -518,7 +545,7 @@ function navSetLoggedIn(name) {
         trigger.setAttribute('onclick', 'toggleNavDropdown()');
         trigger.innerHTML =
             '<div class="nav-user-avatar" id="navUserAvatar">' + initial + '</div>' +
-            '<span class="nav-user-name d-none d-md-block" id="navUserNameEl">' + name + '<small>Member</small></span>' +
+            '<span class="nav-user-name d-none d-md-block" id="navUserNameEl">' + name + '<small id="navUserMobileSub">' + mobileText + '</small></span>' +
             '<i class="bi bi-chevron-down text-muted" style="font-size:11px;"></i>';
         wrap.insertBefore(trigger, wrap.querySelector('.nav-user-dropdown'));
         loginBtn.remove();
@@ -527,13 +554,19 @@ function navSetLoggedIn(name) {
         var av = document.getElementById('navUserAvatar');
         if (av) av.textContent = initial;
         var nm = document.getElementById('navUserNameEl');
-        if (nm) nm.firstChild.textContent = name;
+        if (nm) {
+            nm.innerHTML = name + '<small id="navUserMobileSub">' + mobileText + '</small>';
+        }
     }
     // Update dropdown header
     var ddAv = document.getElementById('navDdAvatar');
     if (ddAv) ddAv.textContent = initial;
     var ddNm = document.getElementById('navDdName');
     if (ddNm) ddNm.textContent = name;
+    var ddMob = document.getElementById('navDdMobile');
+    if (ddMob) {
+        ddMob.innerHTML = mobile ? '<i class="bi bi-phone"></i> +91 ' + mobile : '';
+    }
 }
 
 function navSetLoggedOut() {

@@ -70,22 +70,26 @@ class User_auth extends MX_Controller
 
     // ─── STEP 1: Prepare OTP session (browser will send OTP via Widget JS) ───
     // Validates input, does DB checks, stores pending data in session.
-    // Does NOT call MSG91 — that is done by browser JS directly.
+    // Supports:
+    //  - Direct Quick Login (Mobile number only -> existing user or auto-register)
+    //  - Registration (Name + Mobile + Email)
+    //  - Returning User (from localStorage)
     public function prepare_otp()
     {
-        $name      = $this->input->post('name',      TRUE);
-        $email     = $this->input->post('email',     TRUE);
-        $mobile    = $this->input->post('mobile',    TRUE);
+        $name      = trim((string)$this->input->post('name',      TRUE));
+        $email     = trim((string)$this->input->post('email',     TRUE));
+        $mobile    = trim((string)$this->input->post('mobile',    TRUE));
         $returning = $this->input->post('returning', TRUE);
+        $is_register = $this->input->post('is_register', TRUE);
 
-        if (!$mobile || strlen(preg_replace('/\D/', '', $mobile)) !== 10) {
+        $cleanMobile = preg_replace('/\D/', '', $mobile);
+        if (!$cleanMobile || strlen($cleanMobile) !== 10) {
             echo json_encode(['success' => false, 'message' => 'Please enter a valid 10-digit mobile number.']);
             return;
         }
 
-        $mobile = preg_replace('/\D/', '', $mobile);
-
-        // DB validation
+        // DB validation & connection
+        $admin_db = NULL;
         try {
             $admin_db = $this->load->database('admin_hub', TRUE);
             if (!$admin_db || !is_object($admin_db)) {
@@ -98,65 +102,80 @@ class User_auth extends MX_Controller
             return;
         }
 
-        if (!$returning) {
-            if (!$name || strlen(trim($name)) < 2) {
+        // Check if mobile is already registered in DB
+        $existing_user = NULL;
+        try {
+            $existing_user = $admin_db->where('mobile', $cleanMobile)->get('users')->row();
+        } catch (\Throwable $e) {
+            log_message('error', 'User lookup error: ' . $e->getMessage());
+        }
+
+        if ($existing_user) {
+            // Existing user found in DB
+            $finalName = !empty($existing_user->name) ? $existing_user->name : (!empty($name) ? $name : 'Customer');
+            $finalEmail = !empty($existing_user->email) ? $existing_user->email : $email;
+
+            $this->session->set_userdata('otp_pending', [
+                'name'         => $finalName,
+                'email'        => $finalEmail,
+                'mobile'       => $cleanMobile,
+                'is_existing'  => true,
+                'sent_at'      => time()
+            ]);
+
+            echo json_encode([
+                'success'       => true,
+                'is_existing'   => true,
+                'name'          => $finalName,
+                'mobile'        => $cleanMobile,
+                'mobile91'      => '91' . $cleanMobile,
+                'message'       => 'OTP ready.'
+            ]);
+            return;
+        }
+
+        // New user / not yet in DB
+        // If coming from explicit registration tab, validate name
+        if ($is_register) {
+            if (empty($name) || strlen($name) < 2) {
                 echo json_encode(['success' => false, 'message' => 'Please enter your full name.']);
                 return;
             }
+        }
 
-            // Check if mobile is already registered — allow OTP sending for existing users as well
+        // Check email uniqueness if email provided
+        if (!empty($email)) {
             try {
-                $mobile_user = $admin_db->where('mobile', $mobile)->get('users')->row();
-                if ($mobile_user) {
-                    $name = ($name && strlen(trim($name)) >= 2) ? trim($name) : $mobile_user->name;
-                    $this->session->set_userdata('otp_pending', [
-                        'name'    => $name,
-                        'email'   => $email ?: $mobile_user->email,
-                        'mobile'  => $mobile,
-                        'sent_at' => time()
-                    ]);
-                    echo json_encode([
-                        'success'            => true,
-                        'already_registered' => true,
-                        'message'            => 'OTP ready.',
-                        'name'               => $name,
-                        'mobile'             => $mobile,
-                        'mobile91'           => '91' . $mobile
-                    ]);
+                $email_user = $admin_db->where('email', $email)
+                                       ->where('mobile !=', $cleanMobile)
+                                       ->get('users')->row();
+                if ($email_user) {
+                    echo json_encode(['success' => false, 'message' => 'This email is already registered with another mobile number.']);
                     return;
                 }
             } catch (\Throwable $e) {}
-
-            // Check email uniqueness for new users
-            if ($email && trim($email)) {
-                try {
-                    $email_user = $admin_db->where('email', trim($email))
-                                           ->where('mobile !=', $mobile)
-                                           ->get('users')->row();
-                    if ($email_user) {
-                        echo json_encode(['success' => false, 'message' => 'This email is already registered with another mobile number.']);
-                        return;
-                    }
-                } catch (\Throwable $e) {}
-            }
-        } else {
-            try {
-                $mob_user = $admin_db->where('mobile', $mobile)->get('users')->row();
-                $name     = $mob_user ? $mob_user->name : ($name ?: 'Member');
-            } catch (\Throwable $e) {
-                $name = $name ?: 'Member';
-            }
         }
 
-        // Store pending data in session (no OTP yet — browser sends it)
+        // Resolve name for new user
+        $finalName = !empty($name) ? $name : 'Customer';
+
+        // Store pending data in session
         $this->session->set_userdata('otp_pending', [
-            'name'    => $name,
-            'email'   => $email,
-            'mobile'  => $mobile,
-            'sent_at' => time()
+            'name'        => $finalName,
+            'email'       => $email,
+            'mobile'      => $cleanMobile,
+            'is_existing' => false,
+            'sent_at'     => time()
         ]);
 
-        echo json_encode(['success' => true, 'mobile91' => '91' . $mobile]);
+        echo json_encode([
+            'success'     => true,
+            'is_existing' => false,
+            'name'        => $finalName,
+            'mobile'      => $cleanMobile,
+            'mobile91'    => '91' . $cleanMobile,
+            'message'     => 'OTP ready.'
+        ]);
     }
 
     // ─── Direct / Resend send_otp ──────────────────────────────────────────
@@ -330,8 +349,8 @@ class User_auth extends MX_Controller
 
         // OTP verified — find or create user in DB
         $userMobile = $cleanMobile;
-        $userName   = $pending['name'] ?? 'Member';
-        $userEmail  = $pending['email'] ?? '';
+        $userName   = !empty($pending['name']) ? $pending['name'] : 'Customer';
+        $userEmail  = !empty($pending['email']) ? $pending['email'] : '';
 
         try {
             if (!$admin_db) {
@@ -342,8 +361,15 @@ class User_auth extends MX_Controller
             $existing = $admin_db->where('mobile', $userMobile)->get('users')->row();
 
             if ($existing) {
-                $user_id   = $existing->id;
-                $user_name = $existing->name;
+                $user_id = $existing->id;
+
+                // Update name if new specific name provided and old name was generic
+                if (!empty($userName) && $userName !== 'Customer' && $userName !== 'Member' && (empty($existing->name) || in_array($existing->name, ['Customer', 'Member', 'Website Lead']))) {
+                    $admin_db->where('id', $user_id)->update('users', ['name' => $userName, 'updated_at' => date('Y-m-d H:i:s')]);
+                    $user_name = $userName;
+                } else {
+                    $user_name = !empty($existing->name) ? $existing->name : $userName;
+                }
 
                 // Ensure existing user has 'User' or 'Customer' role assigned
                 try {
@@ -355,11 +381,11 @@ class User_auth extends MX_Controller
                     ", [$user_id])->row();
 
                     if (!$has_user_role) {
-                        $user_role = $admin_db->where('name', 'User')->get('roles')->row();
+                        $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
                         if (!$user_role) {
-                            $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
+                            $user_role = $admin_db->where('name', 'User')->get('roles')->row();
                         }
-                        $role_id = $user_role ? $user_role->id : 15;
+                        $role_id = $user_role ? $user_role->id : 11;
                         $admin_db->insert('model_has_roles', [
                             'role_id'    => $role_id,
                             'model_type' => 'App\\Models\\User',
@@ -389,11 +415,11 @@ class User_auth extends MX_Controller
                 $user_name = $userName;
 
                 // Assign default Customer / User role
-                $user_role = $admin_db->where('name', 'User')->get('roles')->row();
+                $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
                 if (!$user_role) {
-                    $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
+                    $user_role = $admin_db->where('name', 'User')->get('roles')->row();
                 }
-                $role_id = $user_role ? $user_role->id : 15;
+                $role_id = $user_role ? $user_role->id : 11;
 
                 $admin_db->insert('model_has_roles', [
                     'role_id'    => $role_id,
