@@ -824,10 +824,11 @@ function showOtpVerificationScreen(mobile) {
     $('#modalSubText').text('Enter the 6-digit code sent to your mobile');
     $('#otp1').focus();
 
-    startResendCountdown(30);
+    startResendCountdown(120);
 }
 
 function startResendCountdown(seconds) {
+    if (typeof seconds === 'undefined' || !seconds) seconds = 120;
     var btn = $('#resendBtn');
     var countEl = $('#resendCountdown');
     if (_resendTimer) clearInterval(_resendTimer);
@@ -948,7 +949,7 @@ function resendOtp() {
         function() {
             Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'New OTP sent to +91 ' + mobile, showConfirmButton: false, timer: 3000 });
             clearOtpBoxes();
-            startResendCountdown(30);
+            startResendCountdown(120);
         },
         function(errMsg) {
             $('#otpError').show().text(errMsg);

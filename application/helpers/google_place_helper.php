@@ -208,27 +208,94 @@ if (!function_exists('get_all_approved_reviews')) {
 
 /**
  * Fetch dynamic SEO settings from Database (seo_settings table)
+ * Supports page aliases, city matching, and smart 4-tier fallback.
  */
 if (!function_exists('get_seo_setting')) {
     function get_seo_setting($pageName = 'home', $location = null)
     {
         try {
             $db = get_admin_db_instance();
-            if ($db && $db->conn_id) {
-                $db->where('page_name', $pageName);
-                if (!empty($location)) {
-                    $db->where('LOWER(location)', strtolower(trim($location)));
-                } else {
-                    $db->group_start();
-                    $db->where('location', null);
-                    $db->or_where('location', '');
-                    $db->group_end();
-                }
-                $res = $db->get('seo_settings')->row_array();
-                if (!empty($res)) {
-                    return $res;
+            if (!$db || !$db->conn_id) {
+                return null;
+            }
+
+            $rawPage = strtolower(trim((string)$pageName));
+            $rawLoc  = !empty($location) ? strtolower(trim((string)$location)) : null;
+            if ($rawLoc === 'global' || $rawLoc === 'all') {
+                $rawLoc = null;
+            }
+
+            // Generate candidate page aliases for flexible matching
+            $aliasGroups = [
+                ['about', 'about-us', 'about_us'],
+                ['contact', 'contacts', 'contact-us', 'contact_us'],
+                ['services', 'all-services'],
+                ['testimonials', 'reviews', 'customer-reviews', 'testimonial'],
+                ['why-choose-us', 'why_choose_us', 'choose'],
+                ['term-and-condition', 'terms-and-conditions', 'terms-and-condition', 'term_and_condition', 'terms'],
+                ['privacy', 'privacy-policy', 'privacy_policy'],
+                ['cancellation-refund', 'cancellation-and-refund', 'cancellation_refund', 'refund-policy'],
+                ['branches', 'our-branches', 'our_branches'],
+                ['faq', 'faqs'],
+                ['online-booking', 'online_booking', 'booking', 'bookings'],
+                ['my-bookings', 'my_bookings'],
+                ['photo-gallery', 'photo_gallery', 'gallery'],
+                ['video-gallery', 'video_gallery'],
+                ['blogs', 'blog']
+            ];
+
+            $pageCandidates = [$rawPage];
+            foreach ($aliasGroups as $group) {
+                if (in_array($rawPage, $group)) {
+                    $pageCandidates = array_unique(array_merge($pageCandidates, $group));
+                    break;
                 }
             }
+
+            // 1. If location is provided: Check Exact Page + Location
+            if (!empty($rawLoc)) {
+                $db->where_in('page_name', $pageCandidates);
+                $db->where('LOWER(location)', $rawLoc);
+                $row = $db->get('seo_settings')->row_array();
+                if (!empty($row)) {
+                    return $row;
+                }
+
+                // 2. Location-Page fallback: Check location_page + Location
+                $db->where('page_name', 'location_page');
+                $db->where('LOWER(location)', $rawLoc);
+                $row = $db->get('seo_settings')->row_array();
+                if (!empty($row)) {
+                    return $row;
+                }
+            }
+
+            // 3. Check Page-Specific Global Rule (location IS NULL or empty)
+            $db->where_in('page_name', $pageCandidates);
+            $db->group_start();
+            $db->where('location', null);
+            $db->or_where('location', '');
+            $db->or_where('LOWER(location)', 'global');
+            $db->or_where('LOWER(location)', 'all');
+            $db->group_end();
+            $row = $db->get('seo_settings')->row_array();
+            if (!empty($row)) {
+                return $row;
+            }
+
+            // 4. Exact raw page name match (for custom slugs)
+            if (!in_array($rawPage, $pageCandidates)) {
+                $db->where('page_name', $rawPage);
+                $db->group_start();
+                $db->where('location', null);
+                $db->or_where('location', '');
+                $db->group_end();
+                $row = $db->get('seo_settings')->row_array();
+                if (!empty($row)) {
+                    return $row;
+                }
+            }
+
         } catch (\Throwable $e) {
             log_message('error', 'Error fetching SEO settings: ' . $e->getMessage());
         }

@@ -20,18 +20,89 @@
   $url = strtolower(base_url($clean_uri));
   $robots_meta = (!empty($noindex) && $noindex) ? 'noindex, follow' : 'index, follow';
 
+  // ── Smart Page Name & Location Scope Detection ──
+  $segments = array_values(array_filter(explode('/', $clean_uri)));
+  $seg1 = strtolower($segments[0] ?? '');
+  $seg2 = strtolower($segments[1] ?? '');
+
+  $detectedPage = 'home';
+  $detectedLoc  = null;
+
+  if (empty($clean_uri) || $clean_uri === 'home') {
+      $detectedPage = 'home';
+      $detectedLoc  = null;
+  } elseif (in_array($seg1, ['about', 'about-us', 'about_us'])) {
+      $detectedPage = 'about-us';
+  } elseif (in_array($seg1, ['why-choose-us', 'why_choose_us', 'choose'])) {
+      $detectedPage = 'why-choose-us';
+  } elseif (in_array($seg1, ['branches', 'our-branches', 'our_branches'])) {
+      $detectedPage = 'branches';
+  } elseif (in_array($seg1, ['testimonials', 'reviews', 'customer-reviews', 'testimonial'])) {
+      $detectedPage = 'reviews';
+  } elseif (in_array($seg1, ['online-booking', 'booking', 'bookings'])) {
+      $detectedPage = 'online-booking';
+  } elseif (in_array($seg1, ['my-bookings', 'my_bookings'])) {
+      $detectedPage = 'my-bookings';
+  } elseif (in_array($seg1, ['contact', 'contacts', 'contact-us', 'contact_us'])) {
+      $detectedPage = 'contact-us';
+  } elseif ($seg1 === 'faq' || $seg1 === 'faqs') {
+      $detectedPage = 'faq';
+  } elseif ($seg1 === 'infrastructure') {
+      $detectedPage = 'infrastructure';
+  } elseif ($seg1 === 'photo-gallery') {
+      $detectedPage = 'photo-gallery';
+  } elseif ($seg1 === 'video-gallery') {
+      $detectedPage = 'video-gallery';
+  } elseif (in_array($seg1, ['term-and-condition', 'terms-and-conditions', 'terms-and-condition', 'term_and_condition', 'terms'])) {
+      $detectedPage = 'term-and-condition';
+  } elseif (in_array($seg1, ['privacy', 'privacy-policy', 'privacy_policy'])) {
+      $detectedPage = 'privacy-policy';
+  } elseif (in_array($seg1, ['cancellation-refund', 'cancellation-and-refund', 'cancellation_refund'])) {
+      $detectedPage = 'cancellation-refund';
+  } elseif ($seg1 === 'blogs' || $seg1 === 'blog') {
+      $detectedPage = (!empty($seg2) && $seg1 === 'blog') ? 'blog/' . $seg2 : 'blogs';
+  } elseif ($seg1 === 'services') {
+      $detectedPage = !empty($seg2) ? $seg2 : 'services';
+  } elseif (in_array($seg1, [
+      'home-relocation', 'office-relocation', 'car-transportation-service',
+      'packing-unpacking', 'loading-unloading', 'warehousing-services',
+      'goods-insurance', 'courier-and-cargo', 'luggage-delivery'
+  ])) {
+      $detectedPage = $seg1;
+  } else {
+      // Check for City/State routes or custom slug
+      if (preg_match('/^packers-movers-([a-z0-9\-]+)-india$/', $seg1, $m)) {
+          $detectedPage = 'location_page';
+          $detectedLoc  = $m[1];
+      } elseif (preg_match('/^([a-z0-9\-]+)-packers-movers-([a-z0-9\-]+)$/', $seg1, $m)) {
+          $detectedPage = 'location_page';
+          $detectedLoc  = $m[2];
+      } elseif (preg_match('/^home-shifting-in-([a-z0-9\-]+)$/', $seg1, $m)) {
+          $detectedPage = 'location_page';
+          $detectedLoc  = $m[1];
+      } else {
+          $detectedPage = 'location_page';
+          $detectedLoc  = $clean_uri;
+      }
+  }
+
+  // Override with explicit variables if set by controller
+  $seoPageName = !empty($seo_page_name) ? $seo_page_name : $detectedPage;
+  $seoLocParam = !empty($seo_location) ? $seo_location : $detectedLoc;
+  if (empty($seoLocParam) && $seoPageName === 'location_page' && !empty($city)) {
+      $seoLocParam = strtolower(trim($city));
+  }
+
   // Fetch dynamic SEO settings from Database (seo_settings table)
-  $seoPageName = !empty($seo_page_name) ? $seo_page_name : ($clean_uri === '' || $clean_uri === 'home' ? 'home' : 'location_page');
-  $seoLocParam = !empty($seo_location) ? $seo_location : (!empty($city) ? strtolower($city) : ($seoPageName === 'location_page' ? $clean_uri : null));
   $dbSeo = function_exists('get_seo_setting') ? get_seo_setting($seoPageName, $seoLocParam) : null;
-  if (!$dbSeo && $seoPageName === 'location_page' && !empty($clean_uri)) {
-      $dbSeo = get_seo_setting('location_page', $clean_uri);
+  if (!$dbSeo && !empty($clean_uri)) {
+      $dbSeo = get_seo_setting($clean_uri, null);
   }
 
   if (!empty($dbSeo)) {
-      if (!empty($dbSeo['meta_title'])) $title = $dbSeo['meta_title'];
+      if (!empty($dbSeo['meta_title']))       $title = $dbSeo['meta_title'];
       if (!empty($dbSeo['meta_description'])) $description = $dbSeo['meta_description'];
-      if (!empty($dbSeo['meta_keywords'])) $keywords = $dbSeo['meta_keywords'];
+      if (!empty($dbSeo['meta_keywords']))    $keywords = $dbSeo['meta_keywords'];
   }
 
   if (!@$description) {
