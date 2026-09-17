@@ -18,6 +18,85 @@ class Home_mdl extends CI_Model{
 	    return [];
 	}
 
+	public function get_services()
+	{
+	    try {
+	        $admin_db = $this->load->database('admin_hub', TRUE);
+	        if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('our_services')) {
+	            return $admin_db->where('status', 1)
+	                ->order_by('sort_order', 'asc')
+	                ->order_by('id', 'asc')
+	                ->get('our_services')
+	                ->result();
+	        }
+	    } catch (\Throwable $e) {
+	        log_message('error', 'Home_mdl::get_services DB error: ' . $e->getMessage());
+	    }
+	    return [];
+	}
+
+	public function get_about_setting()
+	{
+	    try {
+	        $admin_db = $this->load->database('admin_hub', TRUE);
+	        if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('about_us_settings')) {
+	            return $admin_db->get('about_us_settings')->row();
+	        }
+	    } catch (\Throwable $e) {
+	        log_message('error', 'Home_mdl::get_about_setting DB error: ' . $e->getMessage());
+	    }
+	    return null;
+	}
+
+	public function get_why_choose_setting()
+	{
+	    try {
+	        $admin_db = $this->load->database('admin_hub', TRUE);
+	        if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('why_choose_us_settings')) {
+	            return $admin_db->get('why_choose_us_settings')->row();
+	        }
+	    } catch (\Throwable $e) {
+	        log_message('error', 'Home_mdl::get_why_choose_setting DB error: ' . $e->getMessage());
+	    }
+	    return null;
+	}
+
+	public function get_why_choose_items()
+	{
+	    try {
+	        $admin_db = $this->load->database('admin_hub', TRUE);
+	        if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('why_choose_us_items')) {
+	            return $admin_db->where('section_type', 'hero_feature')
+	                ->where('status', 1)
+	                ->order_by('sort_order', 'asc')
+	                ->order_by('id', 'asc')
+	                ->get('why_choose_us_items')
+	                ->result();
+	        }
+	    } catch (\Throwable $e) {
+	        log_message('error', 'Home_mdl::get_why_choose_items DB error: ' . $e->getMessage());
+	    }
+	    return [];
+	}
+
+	public function get_why_choose_cards()
+	{
+	    try {
+	        $admin_db = $this->load->database('admin_hub', TRUE);
+	        if ($admin_db && $admin_db->conn_id && $admin_db->table_exists('why_choose_us_items')) {
+	            return $admin_db->where('section_type', 'value_card')
+	                ->where('status', 1)
+	                ->order_by('sort_order', 'asc')
+	                ->order_by('id', 'asc')
+	                ->get('why_choose_us_items')
+	                ->result();
+	        }
+	    } catch (\Throwable $e) {
+	        log_message('error', 'Home_mdl::get_why_choose_cards DB error: ' . $e->getMessage());
+	    }
+	    return [];
+	}
+
 	public function message()
 	{
 	    

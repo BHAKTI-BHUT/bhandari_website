@@ -38,6 +38,12 @@ class Home extends MX_Controller
     {
         $this->load->model('home_mdl');
         $data['faqs'] = $this->home_mdl->get_faqs();
+        $data['services'] = $this->home_mdl->get_services();
+        $data['about_setting'] = $this->home_mdl->get_about_setting();
+        $data['why_choose_setting'] = $this->home_mdl->get_why_choose_setting();
+        $data['why_choose_items'] = $this->home_mdl->get_why_choose_items();
+        $data['why_choose_cards'] = $this->home_mdl->get_why_choose_cards();
+
         $data['title'] = "Packers and Movers in Noida & Greater Noida | Bhandari Packers | +91 7303257332";
         $data['description'] = "Bhandari Packers and Movers — trusted home shifting, office relocation, packing, loading, and vehicle transport services in Noida and Greater Noida. Govt. registered, ISO 9001:2015 certified. Call +91 7303257332 for a free quote.";
         $data['keywords'] = "Packers and Movers Noida, Home Shifting Noida, Greater Noida Packers Movers, House Shifting Noida, Bhandari Packers and Movers, Office Relocation Noida, Local Shifting Noida";

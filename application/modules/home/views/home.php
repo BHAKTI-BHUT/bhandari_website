@@ -57,76 +57,137 @@
   </div>
 </section>
 
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
 <?php /* ===================================================
    SECTION 3 — ABOUT / BUSINESS INTRODUCTION
-   ===================================================== */ ?>
+   ===================================================== */ 
+   $about_title = (!empty($about_setting) && !empty($about_setting->about_title)) 
+       ? $about_setting->about_title 
+       : 'Trusted Packers and Movers<br><span class="text-danger">in Noida &amp; Greater Noida</span>';
+   $who_we_are_title = (!empty($about_setting) && !empty($about_setting->who_we_are_title))
+       ? $about_setting->who_we_are_title
+       : 'Who We Are';
+   $about_desc = (!empty($about_setting) && !empty($about_setting->about_description))
+       ? $about_setting->about_description
+       : null;
+?>
 <section class="py-5" id="about">
   <div class="container py-4 pt-0">
-    <div class="row align-items-center justify-content-between g-5">
+    <div class="row align-items-start justify-content-between g-4 g-lg-5">
 
-      <div class="col-lg-5 mb-4 mb-lg-0 animate rounded">
-        <img
-          src="<?= base_url('assets/images/gallery/newabout.png') ?>"
-          alt="Bhandari Packers and Movers team ready for home shifting in Noida"
-          width="768" height="512"
-          class="img-fluid shadow rounded"
-          loading="lazy">
+      <div class="col-lg-5 mb-4 mb-lg-0 animate about-media-col">
+        <div class="about-media-wrapper sticky-lg-top" style="top: 100px; z-index: 1;">
+          <div class="about-img-box position-relative overflow-hidden rounded-4 shadow-sm mb-3">
+            <img
+              src="<?= base_url('assets/images/gallery/newabout.png') ?>"
+              alt="Bhandari Packers and Movers team ready for home shifting in Noida"
+              width="768" height="512"
+              class="img-fluid rounded-4 w-100 object-fit-cover shadow"
+              style="max-height: 380px;"
+              loading="lazy">
+            <div class="about-img-badge position-absolute bottom-0 start-0 m-3 px-3 py-2 rounded-3 text-white bg-dark bg-opacity-75 d-flex align-items-center gap-2">
+              <i class="bi bi-patch-check-fill text-warning fs-5"></i>
+              <div class="text-start">
+                <span class="d-block fw-bold small lh-1">ISO 9001:2015</span>
+                <span class="d-block text-white-50" style="font-size: 11px;">Certified Relocation</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trust & Stats Strip below Image to fill vertical space -->
+          <div class="about-stats-card p-3 rounded-3 bg-white border shadow-sm">
+            <div class="row g-2 text-center align-items-center">
+              <div class="col-4 border-end">
+                <span class="fw-bold fs-4 text-danger d-block mb-0">14+</span>
+                <span class="text-muted small" style="font-size: 11px;">Years Trust</span>
+              </div>
+              <div class="col-4 border-end">
+                <span class="fw-bold fs-4 text-danger d-block mb-0">50K+</span>
+                <span class="text-muted small" style="font-size: 11px;">Happy Moves</span>
+              </div>
+              <div class="col-4">
+                <span class="fw-bold fs-4 text-warning d-block mb-0">4.9★</span>
+                <span class="text-muted small" style="font-size: 11px;">Google Rated</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="col-lg-6 animate delay-1">
-        <span class="section-label-tag">Who We Are</span>
+      <div class="col-lg-7 animate delay-1">
+        <span class="section-label-tag"><?= htmlspecialchars(strip_tags($who_we_are_title)) ?></span>
         <h2 class="section-h2 mt-2 mb-3">
-          Trusted Packers and Movers<br>
-          <span class="text-danger">in Noida &amp; Greater Noida</span>
+          <?= (strpos($about_title, '<') !== false) ? $about_title : htmlspecialchars($about_title) ?>
         </h2>
-        <p class="section-para-text">
-          Bhandari Packers and Movers is a <strong>Govt. registered, ISO 9001:2015 certified</strong>
-          relocation company based in Noida. We have been helping families and businesses in
-          Noida, Greater Noida, and the NCR region move safely and smoothly since 2010.
-        </p>
-        <p class="section-para-text">
-          Our team specialises in home shifting — whether it's a local move within Noida sectors,
-          a shift to Greater Noida West, or an intercity relocation across India.
-          We use quality packing materials and take care of your belongings as our own.
-        </p>
+        <?php if (!empty($about_desc)): ?>
+          <div class="section-para-text">
+            <?= $about_desc ?>
+          </div>
+        <?php else: ?>
+          <p class="section-para-text">
+            Bhandari Packers and Movers is a <strong>Govt. registered, ISO 9001:2015 certified</strong>
+            relocation company based in Noida. We have been helping families and businesses in
+            Noida, Greater Noida, and the NCR region move safely and smoothly since 2010.
+          </p>
+          <p class="section-para-text">
+            Our team specialises in home shifting — whether it's a local move within Noida sectors,
+            a shift to Greater Noida West, or an intercity relocation across India.
+            We use quality packing materials and take care of your belongings as our own.
+          </p>
+        <?php endif; ?>
 
         <div class="row mt-4 g-3">
-          <div class="col-md-6">
-            <div class="about-feature-item">
-              <i class="bi bi-check2-circle about-feature-icon" aria-hidden="true"></i>
-              <div>
-                <strong>Experienced Team</strong>
-                <p class="mb-0 text-muted small">Trained movers with years of hands-on experience</p>
+          <?php if (!empty($why_choose_items)): ?>
+            <?php foreach (array_slice($why_choose_items, 0, 4) as $item): ?>
+              <div class="col-md-6">
+                <div class="about-feature-item">
+                  <i class="<?= htmlspecialchars($item->icon_class ?: 'bi bi-check2-circle') ?> about-feature-icon" aria-hidden="true"></i>
+                  <div>
+                    <strong><?= htmlspecialchars($item->title) ?></strong>
+                    <p class="mb-0 text-muted small"><?= htmlspecialchars($item->description) ?></p>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="col-md-6">
+              <div class="about-feature-item">
+                <i class="bi bi-check2-circle about-feature-icon" aria-hidden="true"></i>
+                <div>
+                  <strong>Experienced Team</strong>
+                  <p class="mb-0 text-muted small">Trained movers with years of hands-on experience</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="about-feature-item">
-              <i class="bi bi-shield-check about-feature-icon" aria-hidden="true"></i>
-              <div>
-                <strong>Goods Insurance Available</strong>
-                <p class="mb-0 text-muted small">Transit insurance option for added peace of mind</p>
+            <div class="col-md-6">
+              <div class="about-feature-item">
+                <i class="bi bi-shield-check about-feature-icon" aria-hidden="true"></i>
+                <div>
+                  <strong>Goods Insurance Available</strong>
+                  <p class="mb-0 text-muted small">Transit insurance option for added peace of mind</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="about-feature-item">
-              <i class="bi bi-truck about-feature-icon" aria-hidden="true"></i>
-              <div>
-                <strong>Well-Maintained Vehicles</strong>
-                <p class="mb-0 text-muted small">Closed-body trucks for safe transportation</p>
+            <div class="col-md-6">
+              <div class="about-feature-item">
+                <i class="bi bi-truck about-feature-icon" aria-hidden="true"></i>
+                <div>
+                  <strong>Well-Maintained Vehicles</strong>
+                  <p class="mb-0 text-muted small">Closed-body trucks for safe transportation</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="col-md-6">
-            <div class="about-feature-item">
-              <i class="bi bi-currency-rupee about-feature-icon" aria-hidden="true"></i>
-              <div>
-                <strong>Transparent Pricing</strong>
-                <p class="mb-0 text-muted small">Clear quotes with no hidden charges</p>
+            <div class="col-md-6">
+              <div class="about-feature-item">
+                <i class="bi bi-currency-rupee about-feature-icon" aria-hidden="true"></i>
+                <div>
+                  <strong>Transparent Pricing</strong>
+                  <p class="mb-0 text-muted small">Clear quotes with no hidden charges</p>
+                </div>
               </div>
             </div>
-          </div>
+          <?php endif; ?>
         </div>
 
         <div class="mt-4 d-flex flex-wrap gap-2">
@@ -161,114 +222,135 @@
       </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-house-door-fill fs-2" aria-hidden="true"></i>
+      <?php if (!empty($services)): ?>
+        <?php foreach ($services as $service): ?>
+          <div class="col-md-6 col-lg-4">
+            <div class="service-card-v2 text-center p-4 h-100 d-flex flex-column justify-content-between">
+              <div>
+                <div class="service-card-icon-wrap mb-3">
+                  <i class="<?= htmlspecialchars($service->icon_class ?: 'ri-truck-line') ?> fs-2" aria-hidden="true"></i>
+                </div>
+                <h3 class="fw-semibold fs-5 mb-2"><?= htmlspecialchars($service->service_name) ?></h3>
+                <p class="text-muted small mb-3"><?= htmlspecialchars($service->short_description) ?></p>
+              </div>
+              <div>
+                <a href="<?= site_url('services/' . $service->slug) ?>" class="btn-service-link" aria-label="View <?= htmlspecialchars($service->service_name) ?> service details">
+                  View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+                </a>
+              </div>
+            </div>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Home Shifting</h3>
-          <p class="text-muted small mb-3">Safe and careful home relocation — from packing your belongings to setting them up at your new address.</p>
-          <a href="<?= site_url('home-relocation') ?>" class="btn-service-link" aria-label="View Home Shifting service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-building fs-2" aria-hidden="true"></i>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-house-door-fill fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Home Shifting</h3>
+            <p class="text-muted small mb-3">Safe and careful home relocation — from packing your belongings to setting them up at your new address.</p>
+            <a href="<?= site_url('home-relocation') ?>" class="btn-service-link" aria-label="View Home Shifting service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Office &amp; Corporate Shifting</h3>
-          <p class="text-muted small mb-3">Minimal-downtime office relocation — furniture, IT equipment, and documents handled with care.</p>
-          <a href="<?= site_url('office-relocation') ?>" class="btn-service-link" aria-label="View Office Relocation service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-pin-map-fill fs-2" aria-hidden="true"></i>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-building fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Office &amp; Corporate Shifting</h3>
+            <p class="text-muted small mb-3">Minimal-downtime office relocation — furniture, IT equipment, and documents handled with care.</p>
+            <a href="<?= site_url('office-relocation') ?>" class="btn-service-link" aria-label="View Office Relocation service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Local Shifting</h3>
-          <p class="text-muted small mb-3">Moving within the same city or nearby area — quick, affordable, and hassle-free local relocation.</p>
-          <a href="<?= site_url('home-relocation') ?>" class="btn-service-link" aria-label="View Local Shifting service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-truck fs-2" aria-hidden="true"></i>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-pin-map-fill fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Local Shifting</h3>
+            <p class="text-muted small mb-3">Moving within the same city or nearby area — quick, affordable, and hassle-free local relocation.</p>
+            <a href="<?= site_url('home-relocation') ?>" class="btn-service-link" aria-label="View Local Shifting service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Intercity Shifting</h3>
-          <p class="text-muted small mb-3">Long-distance moves from Noida to any city across India — GPS-tracked, timely delivery guaranteed.</p>
-          <a href="<?= site_url('home-relocation') ?>" class="btn-service-link" aria-label="View Intercity Shifting service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-box-seam-fill fs-2" aria-hidden="true"></i>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-truck fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Intercity Shifting</h3>
+            <p class="text-muted small mb-3">Long-distance moves from Noida to any city across India — GPS-tracked, timely delivery guaranteed.</p>
+            <a href="<?= site_url('home-relocation') ?>" class="btn-service-link" aria-label="View Intercity Shifting service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Packing &amp; Unpacking</h3>
-          <p class="text-muted small mb-3">Quality packing materials including bubble wrap, corrugated boxes, and foam padding for fragile items.</p>
-          <a href="<?= site_url('packing-unpacking') ?>" class="btn-service-link" aria-label="View Packing and Unpacking service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-box-arrow-up fs-2" aria-hidden="true"></i>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-box-seam-fill fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Packing &amp; Unpacking</h3>
+            <p class="text-muted small mb-3">Quality packing materials including bubble wrap, corrugated boxes, and foam padding for fragile items.</p>
+            <a href="<?= site_url('packing-unpacking') ?>" class="btn-service-link" aria-label="View Packing and Unpacking service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Loading &amp; Unloading</h3>
-          <p class="text-muted small mb-3">Careful handling of heavy and fragile items — our trained staff ensures safe loading and unloading.</p>
-          <a href="<?= site_url('loading-unloading') ?>" class="btn-service-link" aria-label="View Loading and Unloading service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-car-front-fill fs-2" aria-hidden="true"></i>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-box-arrow-up fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Loading &amp; Unloading</h3>
+            <p class="text-muted small mb-3">Careful handling of heavy and fragile items — our trained staff ensures safe loading and unloading.</p>
+            <a href="<?= site_url('loading-unloading') ?>" class="btn-service-link" aria-label="View Loading and Unloading service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Vehicle Transportation</h3>
-          <p class="text-muted small mb-3">Safe car and bike transport via enclosed carriers — your vehicle protected throughout transit.</p>
-          <a href="<?= site_url('car-transportation-service') ?>" class="btn-service-link" aria-label="View Vehicle Transportation service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-md-6 col-lg-4">
-        <div class="service-card-v2 text-center p-4 h-100">
-          <div class="service-card-icon-wrap mb-3">
-            <i class="bi bi-archive-fill fs-2" aria-hidden="true"></i>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-car-front-fill fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Vehicle Transportation</h3>
+            <p class="text-muted small mb-3">Safe car and bike transport via enclosed carriers — your vehicle protected throughout transit.</p>
+            <a href="<?= site_url('car-transportation-service') ?>" class="btn-service-link" aria-label="View Vehicle Transportation service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
           </div>
-          <h3 class="fw-semibold fs-5 mb-2">Warehouse &amp; Storage</h3>
-          <p class="text-muted small mb-3">Short and long-term storage solutions with security monitoring — ideal during transition periods.</p>
-          <a href="<?= site_url('warehousing-services') ?>" class="btn-service-link" aria-label="View Warehouse and Storage service details">
-            View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-          </a>
         </div>
-      </div>
 
-      <div class="col-12 text-center mt-2">
-        <a href="<?= site_url('services') ?>" class="btn btn-outline-danger px-5">
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card-v2 text-center p-4 h-100">
+            <div class="service-card-icon-wrap mb-3">
+              <i class="bi bi-archive-fill fs-2" aria-hidden="true"></i>
+            </div>
+            <h3 class="fw-semibold fs-5 mb-2">Warehouse &amp; Storage</h3>
+            <p class="text-muted small mb-3">Short and long-term storage solutions with security monitoring — ideal during transition periods.</p>
+            <a href="<?= site_url('warehousing-services') ?>" class="btn-service-link" aria-label="View Warehouse and Storage service details">
+              View Details <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+      <?php endif; ?>
+
+      <div class="col-12 text-center mt-5 pt-3">
+        <a href="<?= site_url('services') ?>" class="btn btn-outline-danger px-5 py-2 fw-semibold rounded-pill shadow-sm">
           <i class="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>View All Services
         </a>
       </div>
@@ -688,9 +770,23 @@
   line-height: 1.3;
 }
 .section-para-text {
-  font-size: 16px;
+  font-size: 15.5px;
   line-height: 1.75;
   color: #374151;
+}
+.section-para-text p {
+  margin-bottom: 0.9rem;
+}
+.section-para-text p:last-child {
+  margin-bottom: 0;
+}
+.about-stats-card {
+  border: 1px solid #eef2f6 !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.about-stats-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.06) !important;
 }
 
 /* ── Trust Strip ── */
