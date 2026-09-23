@@ -2,12 +2,18 @@ User-agent: *
 Disallow: /error/
 Disallow: /system/
 Disallow: /application/
+Disallow: /admin/
 Disallow: /admin-area-panel.php
 Disallow: /clear_laravel_cache.php
 Disallow: /db_test.php
 Disallow: /test_otp_delivery.php
+Disallow: /user-auth/
+Disallow: /contacts/update-registration-payment
+Disallow: /contacts/submit-online-booking
+Disallow: /contacts/get-registration-fee
+Disallow: /my-bookings
 
 Allow: /assets/
 Allow: /uploads/
 
-Sitemap: https://bhandaripackersandmovers.in/sitemap.xml  
+Sitemap: https://bhandaripackersandmovers.in/sitemap.xml

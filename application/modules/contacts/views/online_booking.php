@@ -1386,7 +1386,7 @@ $(function() {
     if (targetStepFromPHP >= 2 && targetStepFromPHP <= 4) {
         setTimeout(function() { 
             switchStepTo(targetStepFromPHP); 
-        }, 600); // 600ms delay ensures DOM items/addons are fully rendered
+        }, 100); // Minimal delay — DOM is ready
     }
     // ──────────────────────────────────────────────────
 });
@@ -1453,6 +1453,7 @@ $(document).on('click', '#btnStickyPrev', function (e) {
 // Sticky Next button click handler
 $(document).on('click', '#btnStickyNext', function (e) {
     e.preventDefault();
+    if ($(this).prop('disabled')) return; // Prevent double-click during save
     const currentStep = getCurrentStep();
     const isEditing = $('#editing_booking_id').val() || '';
 
@@ -1472,7 +1473,13 @@ $(document).on('click', '#btnStickyNext', function (e) {
 
         switchStepTo(currentStep + 1);
     } else {
-        handleWizardSubmit();
+        // Step 4: If booking already saved, directly open payment — no login recheck
+        if (window.bookingSavedForPayment && window.lastSavedBookingId) {
+            const fee = window.lastPaidRegFee || defaultRegFee;
+            openRegistrationPayment(window.lastSavedBookingId, fee);
+        } else {
+            handleWizardSubmit();
+        }
     }
 });
 
@@ -1642,10 +1649,10 @@ function switchStepTo(stepNum) {
         $('.sticky-action-footer').removeClass('is-step-4');
     }
 
-    // Smooth scroll to wizard tabs top
+    // Instant scroll to wizard tabs top for fast step transitions
     let wizardTop = $('#step-dot-1').length ? $('#step-dot-1').offset().top - 80 : 0;
     if (wizardTop > 0) {
-        window.scrollTo({ top: wizardTop, behavior: 'smooth' });
+        window.scrollTo({ top: wizardTop, behavior: 'instant' });
     }
 }
 
@@ -2847,7 +2854,8 @@ function openRegistrationPayment(bookingId, fee) {
 }
 
 function saveBookingOnlyAndAdvance() {
-    showToast('Saving shifting details...', 'info');
+    // Disable the next button to prevent double-clicks
+    $('#btnStickyNext').prop('disabled', true).html('Saving... <span class="spinner-border spinner-border-sm ms-1"></span>');
 
     const addonsData = [];
     $('.addon-wizard-chk:checked').each(function () {
@@ -2881,6 +2889,7 @@ function saveBookingOnlyAndAdvance() {
         url: '<?= site_url("contacts/submit-online-booking") ?>',
         data: formData,
         success: function (r) {
+            $('#btnStickyNext').prop('disabled', false);
             try {
                 let res = (typeof r === 'string') ? JSON.parse(r) : r;
                 if (res && res.status === true && res.booking_id) {
@@ -2889,9 +2898,9 @@ function saveBookingOnlyAndAdvance() {
                     window.lastSavedBookingId = bookingId;
                     window.lastPaidRegFee = fee;
                     window.bookingSavedForPayment = true;
-                    // Do NOT clear draft here — draft persists until actual payment is completed
-                    showToast('Booking saved. Proceed to final payment.', 'success');
+                    // Switch to step 4 first — toast appears after
                     switchStepTo(4);
+                    showToast('Booking saved. Proceed to final payment.', 'success');
                     return;
                 }
                 showToast((res && res.message) || 'Could not save booking details.', 'error');
@@ -2900,6 +2909,7 @@ function saveBookingOnlyAndAdvance() {
             }
         },
         error: function () {
+            $('#btnStickyNext').prop('disabled', false);
             showToast('Booking save failed. Please try again.', 'error');
         }
     });
@@ -2912,7 +2922,7 @@ function saveNewBookingAndPay() {
         return;
     }
 
-    showToast('Saving shifting details...', 'info');
+    // No 'Saving...' toast here — handled by saveBookingOnlyAndAdvance on step 3->4
 
     const addonsData = [];
     $('.addon-wizard-chk:checked').each(function () {
@@ -3041,14 +3051,14 @@ function updateRegistrationPaymentStatus(bookingId, status, paymentId, orderId) 
                         + '</div>'
                         + '<div style="background:linear-gradient(135deg, #fff5ed, #ffede0); border:1.5px solid #ffcca8; border-radius:8px; padding:7px 10px; display:flex; align-items:center; justify-content:space-between;"><div style="display:flex; align-items:center; gap:6px;"><div style="width:24px; height:24px; background:#FC5D09; border-radius:5px; display:flex; align-items:center; justify-content:center;"><i class="bi bi-wallet2" style="color:#ffffff; font-size:12px;"></i></div><span style="font-weight:700; color:#2d3748; font-size:0.8rem;">Total Paid</span></div><div style="color:#FC5D09; font-weight:850; font-size:0.98rem;">₹' + pAmount + '</div></div>'
                         + '</div>'
-                        + '<button id="swalConfirmOkBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b); color:#ffffff; border:none; border-radius:10px; padding:10px 0; font-weight:700; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 14px rgba(252, 93, 9,0.35); width:100%; display:flex; align-items:center; justify-content:center; gap:6px;">Go to Homepage <i class="bi bi-arrow-right" style="font-size:0.95rem;"></i></button>'
+                        + '<button id="swalConfirmOkBtn" style="background:linear-gradient(135deg,#FC5D09,#ff4b2b); color:#ffffff; border:none; border-radius:10px; padding:10px 0; font-weight:700; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 14px rgba(252, 93, 9,0.35); width:100%; display:flex; align-items:center; justify-content:center; gap:6px;">View My Bookings <i class="bi bi-arrow-right" style="font-size:0.95rem;"></i></button>'
                         + '</div>',
                     showConfirmButton: false,
                     allowOutsideClick: false,
                     didOpen: () => {
                         document.getElementById('swalConfirmOkBtn').addEventListener('click', () => {
                             Swal.close();
-                            window.location.href = '<?= site_url() ?>';
+                            window.location.href = '<?= site_url("my-bookings") ?>';
                         });
                     }
                 });

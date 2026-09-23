@@ -2,12 +2,13 @@
 /**
  * Dynamic City Page Template — Phase 5 Rebuild
  */
-$this->load->database();
+try { $this->load->database(); } catch (\Throwable $e) { log_message('error', 'view_service DB error: ' . $e->getMessage()); }
 $this->load->helper('text');
 
 $city_clean = !empty($city) ? htmlspecialchars($city) : 'City';
-$st = strtolower(str_replace(" ", "-", $state));
-$ctlink = strtolower(str_replace(" ", "-", $city_clean));
+$st = strtolower(str_replace([" ", ","], ["-", ""], $state));
+$ctlink = strtolower(str_replace([" ", ","], ["-", ""], strip_tags($city_clean)));
+$ctlink = preg_replace('/-+/', '-', rtrim($ctlink, '-')); // Remove double hyphens
 
 // Fallback image logic
 $city_slug = $this->uri->segment(1);
@@ -131,7 +132,7 @@ if (empty($custom_content)) {
         <?= $htmlcontent ?>
       </div>
       <div class="mt-4">
-        <a href="#contact-cta" class="btn btn-danger px-4 me-2">Get a Quote</a>
+        <a href="#quote-form-section" onclick="scrollToQuoteForm(event)" class="btn btn-danger px-4 me-2">Get a Quote</a>
         <a href="<?= site_url('about') ?>" class="btn btn-outline-danger px-4">About Us</a>
       </div>
     </div>
@@ -388,7 +389,7 @@ if (empty($custom_content)) {
         <a href="<?= !empty($phonehtml) ? $phonehtml : 'tel:+917303257332' ?>" class="btn btn-danger px-4 py-3 fw-bold mb-2 w-100 w-sm-auto me-sm-2">
           <i class="bi bi-telephone-fill me-2"></i> Call <?= !empty($phone) ? htmlspecialchars($phone) : '+91 7303257332' ?>
         </a>
-        <a href="<?= site_url('contacts') ?>" class="btn btn-outline-light px-4 py-3 fw-bold mb-2 w-100 w-sm-auto">
+        <a href="#quote-form-section" onclick="scrollToQuoteForm(event)" class="btn btn-outline-light px-4 py-3 fw-bold mb-2 w-100 w-sm-auto">
           Get Instant Quote
         </a>
       </div>
@@ -405,3 +406,13 @@ if (empty($custom_content)) {
     box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
   }
 </style>
+
+<script>
+function scrollToQuoteForm(e) {
+  if (e) e.preventDefault();
+  var el = document.getElementById('quote-form-section');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>

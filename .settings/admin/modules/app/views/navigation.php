@@ -39,22 +39,22 @@
 			<li class="sidepadding"><a accesskey="m" href="#/reviews"><i
 			class="fa fa-photo"></i><span class="menu-text">Reviews</span><span
 			class="selected"></span></a></li>
-			<li class="sidepadding"><a accesskey="m" href="#/city"><i
+			<!--<li class="sidepadding"><a accesskey="m" href="#/city"><i
 			class="fa fa-photo"></i><span class="menu-text">City</span><span
-			class="selected"></span></a></li>
+			class="selected"></span></a></li>-->
 			 
-			<li class="sidepadding"><a accesskey="m" href="#/offers"><i
+			<!--<li class="sidepadding"><a accesskey="m" href="#/offers"><i
 			class="fa fa-bullhorn"></i><span class="menu-text">Offers</span><span
-			class="selected"></span></a></li>
+			class="selected"></span></a></li>-->
 			<!--<li class="sidepadding"><a accesskey="m" href="#/ship_main"><i
 			class="fa fa-truck"></i><span class="menu-text">Shipment Orders</span><span
 			class="selected"></span></a></li>
 			<li class="sidepadding"><a accesskey="m" href="#/ship_tracking"><i
 			class="fa fa-arrows-alt"></i><span class="menu-text">Shipment Tracking</span><span
 			class="selected"></span></a></li>  -->
-			<li class="sidepadding"><a accesskey="m" href="#/gallery"><i
+			<!--<li class="sidepadding"><a accesskey="m" href="#/gallery"><i
 			class="fa fa-photo"></i><span class="menu-text">Gallery</span><span
-			class="selected"></span></a></li>
+			class="selected"></span></a></li>-->
 		</ul>
 	</aside>
 	<section id="main-content">

@@ -228,11 +228,11 @@ class Contacts_mdl extends CI_Model
                     ]);
                     $customer_id = $admin_db->insert_id();
                     if ($customer_id) {
-                        $user_role = $admin_db->where('name', 'User')->get('roles')->row();
+                        $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
                         if (!$user_role) {
-                            $user_role = $admin_db->where('name', 'Customer')->get('roles')->row();
+                            $user_role = $admin_db->where('name', 'User')->get('roles')->row();
                         }
-                        $role_id = $user_role ? $user_role->id : 12;
+                        $role_id = $user_role ? $user_role->id : 11;
 
                         $admin_db->insert('model_has_roles', [
                             'role_id'    => $role_id,

@@ -9,14 +9,53 @@
   # Force non-www domain (Only on live site)
   RewriteCond %{HTTP_HOST} ^www\.bhandaripackersandmovers\.in$ [NC]
   RewriteRule ^(.*)$ https://bhandaripackersandmovers.in/$1 [L,R=301]
-  
+
+  # ── Fix: URLs with literal commas → replace comma+hyphen with just hyphen (301) ──
+  # Matches: tikri,-gurugram-packers-movers-gurgaon  →  tikri-gurugram-packers-movers-gurgaon
+  RewriteCond %{REQUEST_URI} , [NC]
+  RewriteRule ^(.*)$ %{REQUEST_URI} [CO=comma_fix:1:bhandaripackersandmovers.in]
+  RewriteCond %{REQUEST_URI} ,
+  RewriteRule ^(.*),(.*)$ /$1$2 [L,R=301,NE]
+
+  # ── Fix: URLs with %2C encoded commas → clean URL ──
+  RewriteCond %{REQUEST_URI} %2C [NC]
+  RewriteRule ^(.*) %{REQUEST_URI} [CO=comma_fix2:1:bhandaripackersandmovers.in]
+  RewriteCond %{REQUEST_URI} %2C [NC]
+  RewriteRule ^(.*)%2C(.*)$ /$1$2 [L,R=301,NE]
+
   # 301 Redirect duplicate and legacy URLs to primary canonical URLs
-  RewriteRule ^index\.html$ / [R=301,L]
-  RewriteRule ^cancellation-and-refund$ /cancellation-refund [R=301,L]
-  RewriteRule ^our-branches$ /branches [R=301,L]
-  RewriteRule ^privacy$ /privacy-policy [R=301,L]
-  RewriteRule ^sector-34-grater-noida-packers-movers-uttar-pradesh$ /sector-34-greater-noida-packers-movers-uttar-pradesh [R=301,L]
+  RewriteRule ^home/?$ / [R=301,L]
+  RewriteRule ^index\.html/?$ / [R=301,L]
+  RewriteRule ^page/?$ / [R=301,L]
+  RewriteRule ^page/(.*)$ /blogs [R=301,L]
+
+  # ── Fix: WordPress ?page_id=... query strings → clean homepage (301) ──
+  RewriteCond %{QUERY_STRING} (^|&)page_id=[0-9]+(&|$) [NC]
+  RewriteRule ^.*$ /? [R=301,L]
+  RewriteRule ^cancellation-and-refund/?$ /cancellation-refund [R=301,L]
+  RewriteRule ^our-branches/?$ /branches [R=301,L]
+  RewriteRule ^privacy/?$ /privacy-policy [R=301,L]
+  RewriteRule ^sector-34-grater-noida-packers-movers-uttar-pradesh/?$ /sector-34-greater-noida-packers-movers-uttar-pradesh [R=301,L]
+  RewriteRule ^packers-movers-in-ghaziabad/?$ /ghaziabad-packers-movers-uttar-pradesh [R=301,L]
+  RewriteRule ^packers-and-movers-in-ghaziabad/?$ /ghaziabad-packers-movers-uttar-pradesh [R=301,L]
+  RewriteRule ^home-shifting-in-sector/?$ /greater-noida-packers-movers-uttar-pradesh [R=301,L]
+  RewriteRule ^sector-greater-noida-packers-movers-uttar-pradesh/?$ /greater-noida-packers-movers-uttar-pradesh [R=301,L]
+  RewriteRule ^packers-movers-in-delhi/?$ /delhi-packers-movers-delhi [R=301,L]
+  RewriteRule ^packers-movers-in-gurugram/?$ /gurgaon [R=301,L]
+  RewriteRule ^packers-movers-in-gurgaon/?$ /gurgaon [R=301,L]
+  RewriteRule ^packers-movers-in-greater-noida/?$ /greater-noida-packers-movers-uttar-pradesh [R=301,L]
   
+  # ── Fix: AMP query strings (?amp=1) → strip and redirect to clean URL ──
+  RewriteCond %{QUERY_STRING} (^|&)amp=1(&|$) [NC]
+  RewriteRule ^house-shifting-services-in-(.*)/?$ /home-relocation? [R=301,L,NE]
+  RewriteCond %{QUERY_STRING} (^|&)amp=1(&|$) [NC]
+  RewriteRule ^blog-posts/?$ /blogs? [R=301,L,NE]
+
+  # ── Fix: house-shifting-services old WP URLs → home-relocation ──
+  RewriteRule ^house-shifting-services-in-(.*)/?$ /home-relocation [R=301,L]
+  RewriteRule ^household-shifting-services-in-(.*)/?$ /home-relocation [R=301,L]
+  RewriteRule ^home-shifting-services-(.*)/?$ /home-relocation [R=301,L]
+
   # CodeIgniter Rewrite (using query string ? for compatibility)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

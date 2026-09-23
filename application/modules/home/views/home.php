@@ -18,14 +18,17 @@
    SECTION 1 — INSTANT QUOTE GENERATOR
    Existing serviceform.php — DO NOT modify the include
    ===================================================== */ ?>
+<?php if (!isset($homepage_sections['quote_form']) || !empty($homepage_sections['quote_form'])): ?>
 <div class="container-fluid cards-slid">
   <?php $this->load->view('contacts/serviceform.php') ?>
 </div>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 2 — TRUST STRIP
    Quick credibility signals right after the quote form
    ===================================================== */ ?>
+<?php if (!isset($homepage_sections['trust_strip']) || !empty($homepage_sections['trust_strip'])): ?>
 <section class="trust-strip py-3" aria-label="Trust and Credentials">
   <div class="container">
     <div class="row g-2 justify-content-center align-items-center text-center">
@@ -56,22 +59,24 @@
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
 
 <?php /* ===================================================
    SECTION 3 — ABOUT / BUSINESS INTRODUCTION
    ===================================================== */ 
-   $about_title = (!empty($about_setting) && !empty($about_setting->about_title)) 
-       ? $about_setting->about_title 
-       : 'Trusted Packers and Movers<br><span class="text-danger">in Noida &amp; Greater Noida</span>';
-   $who_we_are_title = (!empty($about_setting) && !empty($about_setting->who_we_are_title))
-       ? $about_setting->who_we_are_title
-       : 'Who We Are';
-   $about_desc = (!empty($about_setting) && !empty($about_setting->about_description))
-       ? $about_setting->about_description
+   $about_title = (!empty($why_choose_setting) && !empty($why_choose_setting->title)) 
+       ? $why_choose_setting->title 
+       : 'Why Choose <br><span class="text-danger">Bhandari Packers?</span>';
+   $who_we_are_title = (!empty($why_choose_setting) && !empty($why_choose_setting->subtitle_title))
+       ? $why_choose_setting->subtitle_title
+       : 'Why Choose Us';
+   $about_desc = (!empty($why_choose_setting) && !empty($why_choose_setting->description))
+       ? $why_choose_setting->description
        : null;
 ?>
+<?php if (!isset($homepage_sections['about']) || !empty($homepage_sections['about'])): ?>
 <section class="py-5" id="about">
   <div class="container py-4 pt-0">
     <div class="row align-items-start justify-content-between g-4 g-lg-5">
@@ -203,10 +208,12 @@
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 4 — MAIN SERVICES
    ===================================================== */ ?>
+<?php if (!isset($homepage_sections['services']) || !empty($homepage_sections['services'])): ?>
 <section class="section-services py-5 bg-light" id="services">
   <div class="container">
     <div class="row justify-content-center text-center mb-5">
@@ -358,12 +365,14 @@
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 5 — HOW OUR MOVING PROCESS WORKS
-   Uses existing template/shifting.php — not modified
    ===================================================== */ ?>
-<?php $this->load->view('template/shifting.php') ?>
+<?php if (!isset($homepage_sections['shifting']) || !empty($homepage_sections['shifting'])): ?>
+  <?php $this->load->view('template/shifting.php') ?>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 6 — SERVICE AREAS
@@ -480,20 +489,32 @@
 </section> -->
 
 <?php /* ===================================================
-   SECTION 7 — ACHIEVEMENTS
-   Existing dynamic section — not modified
+   SECTION 7 — ACHIEVEMENTS COUNTER STRIP
    ===================================================== */ ?>
-<?php $this->load->view('template/achievements.php') ?>
+<?php if (!empty($homepage_sections['achievements'])): ?>
+  <?php $this->load->view('template/achievements.php') ?>
+<?php endif; ?>
 
 <?php /* ===================================================
-   SECTION 8 — TRUST BADGES
-   Existing section — not modified
+   SECTION 8 — TRUST BADGES (GOOGLE & IBA RECOGNIZED)
    ===================================================== */ ?>
-<?php $this->load->view('template/badge.php') ?>
+<?php if (!empty($homepage_sections['badges'])): ?>
+  <?php $this->load->view('template/badge.php') ?>
+<?php endif; ?>
+
+<?php 
+  $show_qs = (!isset($homepage_sections['quote_showcase']) || !empty($homepage_sections['quote_showcase'])) ||
+             (!isset($homepage_sections['quote_calculator']) || !empty($homepage_sections['quote_calculator'])) ||
+             (!isset($homepage_sections['verified_movers']) || !empty($homepage_sections['verified_movers']));
+?>
+<?php if ($show_qs): ?>
+  <?php $this->load->view('home/dynamic_quote_section'); ?>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 9 — CUSTOMER VIDEOS / REAL PROJECT PROOF
    ===================================================== */ ?>
+<?php if (!isset($homepage_sections['customer_videos']) || !empty($homepage_sections['customer_videos'])): ?>
 <section class="py-5 bg-light" id="customer-videos">
   <div class="container">
     <div class="row justify-content-center text-center mb-5">
@@ -544,6 +565,7 @@
     </div>
   </div>
 </section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 10 — CUSTOMER REVIEWS
@@ -555,6 +577,7 @@
   $gPlaceReviews   = function_exists('get_all_approved_reviews') ? get_all_approved_reviews() : (isset($googlePlaceData['reviews']) ? $googlePlaceData['reviews'] : []);
   $gPlaceUrl       = isset($googlePlaceData['url']) ? $googlePlaceData['url'] : 'https://maps.google.com/?cid=11321227447965075053';
 ?>
+<?php if (!isset($homepage_sections['reviews']) || !empty($homepage_sections['reviews'])): ?>
 <section class="py-5 bg-white" id="reviews">
   <div class="container">
     <div class="text-center mb-5">
@@ -638,19 +661,19 @@
     </div>
   </div>
 </section>
-    </div>
-  </div>
-</section>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 11 — FAQ SECTION
-   Existing faq-widget.php — not modified
    ===================================================== */ ?>
-<?php $this->load->view('home/faq-widget.php', ['city' => 'Noida', 'faqs' => $faqs ?? null]) ?>
+<?php if (!isset($homepage_sections['faq']) || !empty($homepage_sections['faq'])): ?>
+  <?php $this->load->view('home/faq-widget.php', ['city' => 'Noida', 'faqs' => $faqs ?? null]) ?>
+<?php endif; ?>
 
 <?php /* ===================================================
    SECTION 12 — CONTACT / CTA SECTION
    ===================================================== */ ?>
+<?php if (!isset($homepage_sections['contact_cta']) || !empty($homepage_sections['contact_cta'])): ?>
 <section class="contact-cta-section py-5" id="contact-cta" aria-labelledby="cta-heading">
   <div class="container">
     <div class="contact-cta-card">
@@ -704,12 +727,11 @@
     </div>
   </div>
 </section>
+<?php endif; ?>
 
-<?php /* ===================================================
-   SECTION 13 — STATE/CITY WIDGET
-   Existing — not modified
-   ===================================================== */ ?>
-<?php $this->view('packers_movers/state_widget.php'); ?>
+<?php if (!isset($homepage_sections['state_widget']) || !empty($homepage_sections['state_widget'])): ?>
+  <?php $this->view('packers_movers/state_widget.php'); ?>
+<?php endif; ?>
 
 
 <?php /* ===================================================

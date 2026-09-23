@@ -17,7 +17,12 @@
   if (!@$state) $state = isset($companystate) ? "$companystate" : "Uttar Pradesh";
   if (!@$img) $img = base_url('') . "assets/images/logo/logo.jpg";
   $clean_uri = trim($this->uri->uri_string(), '/');
-  $url = strtolower(base_url($clean_uri));
+  if (empty($clean_uri) || $clean_uri === 'home') {
+      $url = rtrim(base_url(), '/') . '/';
+  } else {
+      $url = rtrim(base_url($clean_uri), '/');
+  }
+  $url = strtolower($url);
   $robots_meta = (!empty($noindex) && $noindex) ? 'noindex, follow' : 'index, follow';
 
   // ── Smart Page Name & Location Scope Detection ──
@@ -192,6 +197,74 @@
       "openingHours": "Mo-Sa 09:00-18:00"
     }
   </script>
+  <?php if (empty($clean_uri) || $clean_uri === 'home'): /* Homepage-only: MovingCompany schema */ ?>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MovingCompany",
+    "name": "<?= $company3 ?>",
+    "url": "<?= base_url() ?>",
+    "logo": "<?= !empty($logo_url) ? $logo_url : base_url('assets/images/logo/logo.jpg') ?>",
+    "image": "<?= !empty($logo_url) ? $logo_url : base_url('assets/images/logo/logo.jpg') ?>",
+    "description": "Trusted packers and movers in Noida and Greater Noida. Govt. registered, ISO 9001:2015 certified. Home shifting, office relocation, car transport across India.",
+    "telephone": "+91<?= preg_replace('/[^0-9]/', '', $phone) ?>",
+    "email": "<?= $mail ?>",
+    "foundingDate": "2010",
+    "areaServed": [
+      {"@type": "City", "name": "Noida"},
+      {"@type": "City", "name": "Greater Noida"},
+      {"@type": "City", "name": "Ghaziabad"},
+      {"@type": "City", "name": "Delhi"}
+    ],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "<?= $address1 ?>",
+      "addressLocality": "<?= !empty($city) ? $city : $address2 ?>",
+      "postalCode": "<?= $postalCode ?>",
+      "addressRegion": "Uttar Pradesh",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": <?= $gLat ?>,
+      "longitude": <?= $gLng ?>
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "<?= $gRating ?>",
+      "ratingCount": "<?= $gCount ?>",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "sameAs": [
+      <?= !empty($facebookhtml) ? '"' . htmlspecialchars($facebookhtml) . '",' : '' ?>
+      <?= !empty($youtubehtml) ? '"' . htmlspecialchars($youtubehtml) . '",' : '' ?>
+      "<?= $gMapUrl ?>"
+    ],
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+        "opens": "09:00",
+        "closes": "19:00"
+      }
+    ],
+    "priceRange": "₹₹",
+    "paymentAccepted": "Cash, UPI, Credit Card, Debit Card",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Packers and Movers Services",
+      "itemListElement": [
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Home Shifting in Noida"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Office Relocation Noida"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Car Transportation Noida"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Packing Unpacking Service"}},
+        {"@type": "Offer", "itemOffered": {"@type": "Service", "name": "Warehouse Storage Noida"}}
+      ]
+    }
+  }
+  </script>
+  <?php endif; ?>
   <script type="application/ld+json">
     {
       "@context": "http://schema.org",

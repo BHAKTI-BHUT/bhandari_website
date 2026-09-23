@@ -25,7 +25,62 @@ class Contacts extends MX_Controller
         $data['description'] = "Bhandari Packers and Movers offers reliable, affordable, and safe relocation services across India. We specialize in household shifting, office moving, vehicle transport, and packing services with complete customer satisfaction.";
         $data['module'] = "contacts";
         $data['view_file'] = "contacts";
+
+        // Fetch map URL from admin about_us_settings
+        try {
+            $admin_db = $this->load->database('admin_hub', TRUE);
+            if ($admin_db && $admin_db->conn_id) {
+                $data['page_setting'] = $admin_db->get('about_us_settings')->row();
+            }
+        } catch (Exception $e) {
+            log_message('error', 'Contacts index - admin_db error: ' . $e->getMessage());
+        }
+
         echo Modules::run('template/layout2', $data);
+    }
+
+    public function submit_quick_inquiry()
+    {
+        header('Content-Type: application/json');
+
+        $phone = trim($this->input->post('phone', true));
+        $service_type = trim($this->input->post('service_type', true));
+        $source_page = trim($this->input->post('source_page', true));
+
+        if (empty($phone) || strlen(preg_replace('/[^0-9]/', '', $phone)) < 10) {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Please enter a valid 10-digit phone number.'
+            ]);
+            return;
+        }
+
+        $clean_phone = preg_replace('/[^0-9]/', '', $phone);
+        if (strlen($clean_phone) > 10) {
+            $clean_phone = substr($clean_phone, -10);
+        }
+
+        $data = [
+            'phone'        => $clean_phone,
+            'service_type' => !empty($service_type) ? $service_type : 'Instant Shifting Quote',
+            'source_page'  => !empty($source_page) ? $source_page : 'Homepage Calculator Modal',
+            'status'       => 'pending'
+        ];
+
+        $this->load->model('home/home_mdl');
+        $inserted = $this->home_mdl->insert_quick_inquiry($data);
+
+        if ($inserted) {
+            echo json_encode([
+                'status'  => 'success',
+                'message' => 'Thank you! Our relocation manager will call you back on +91 ' . $clean_phone . ' within 5 minutes.'
+            ]);
+        } else {
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Failed to record inquiry. Please call us directly.'
+            ]);
+        }
     }
 
 

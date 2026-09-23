@@ -1,7 +1,21 @@
 <?php
 $page_title = (!empty($page_setting) && !empty($page_setting->title)) ? $page_setting->title : 'Why Choose Us';
 $grid_title = (!empty($page_setting) && !empty($page_setting->subtitle_title)) ? $page_setting->subtitle_title : 'Why Choose <span class="text-danger">Bhandari Packers and Movers</span>?';
-$hero_img = (!empty($page_setting) && !empty($page_setting->image)) ? $admin_base_url . $page_setting->image : base_url('assets/images/gallery/newabout.png');
+$hero_img = base_url('assets/images/gallery/newabout.png');
+if (!empty($page_setting) && !empty($page_setting->image)) {
+    $img_raw = trim($page_setting->image);
+    if (strpos($img_raw, 'http://') === 0 || strpos($img_raw, 'https://') === 0) {
+        $hero_img = $img_raw;
+    } else if (file_exists(FCPATH . $img_raw)) {
+        $hero_img = base_url($img_raw);
+    } else if (file_exists(FCPATH . 'uploads/why_choose_us/' . basename($img_raw))) {
+        $hero_img = base_url('uploads/why_choose_us/' . basename($img_raw));
+    } else if (file_exists(FCPATH . '../bhandari_admin/public/' . $img_raw)) {
+        $hero_img = base_url('../bhandari_admin/public/' . $img_raw);
+    } else if (!empty($admin_base_url)) {
+        $hero_img = rtrim($admin_base_url, '/') . '/' . ltrim($img_raw, '/');
+    }
+}
 $main_desc = (!empty($page_setting) && !empty($page_setting->description)) ? $page_setting->description : 'With years of hands-on skills in logistics and the relocation industry,<span class="color">Bhandari Packers and Movers</span> have put the hours in and learned how to do every move with excellence. Our professional team is made up of experts in packing and moving your items, - to ensure that each item is packed, loaded, transported and delivered safely and efficiently. Everyone on our team has gone through time consuming advanced packing training and only uses the best materials available to ensure your valuables are secure while in the move.';
 $grid_desc = (!empty($page_setting) && !empty($page_setting->grid_description)) ? $page_setting->grid_description : 'Our company has earned the business of over thousands of happy customers across India, because we are honest, professional, and dependable! Our <b>Packers and Movers reviews</b> reflect our great reputation and ongoing commitment to excellence when delivering moving services.';
 ?>
@@ -36,7 +50,7 @@ $grid_desc = (!empty($page_setting) && !empty($page_setting->grid_description)) 
     <div class="container py-5 pt-0">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-5 mb-lg-0 animate">
-                <img src="<?= $hero_img ?>" alt="<?= htmlspecialchars($page_title) ?>" width="600" height="420" class="img-fluid rounded shadow" loading="lazy" style="max-height: 420px; width: 100%; object-fit: cover;">
+                <img src="<?= $hero_img ?>" alt="<?= htmlspecialchars($page_title) ?>" width="600" height="420" class="img-fluid rounded shadow" loading="lazy" style="max-height: 420px; width: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='<?= base_url('assets/images/gallery/newabout.png') ?>';">
             </div>
             <div class="col-lg-6 animate delay-1">
                 <h2 class="section-title text-start text-dark mb-4"><?= htmlspecialchars($page_title) ?></h2>
