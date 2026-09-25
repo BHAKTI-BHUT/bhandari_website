@@ -98,8 +98,18 @@
       $seoLocParam = strtolower(trim($city));
   }
 
+  $seoSubLocParam = !empty($seo_sub_location) ? $seo_sub_location : (!empty($sub_city) ? $sub_city : (!empty($sector) ? $sector : null));
+  if (empty($seoSubLocParam) && !empty($clean_uri)) {
+      if (preg_match('/(sector-[0-9a-z\-]+|vasant-kunj|gaur-city|crossing-republik|indrapuram|vaishali|dwarka|rohini|noida-extension)/i', $clean_uri, $sm)) {
+          $seoSubLocParam = str_replace('-', ' ', $sm[1]);
+      }
+  }
+
   // Fetch dynamic SEO settings from Database (seo_settings table)
-  $dbSeo = function_exists('get_seo_setting') ? get_seo_setting($seoPageName, $seoLocParam) : null;
+  $dbSeo = function_exists('get_seo_setting') ? get_seo_setting($seoPageName, $seoLocParam, $seoSubLocParam) : null;
+  if (!$dbSeo && !empty($seoSubLocParam)) {
+      $dbSeo = get_seo_setting('sub_city_page', $seoLocParam, $seoSubLocParam);
+  }
   if (!$dbSeo && !empty($clean_uri)) {
       $dbSeo = get_seo_setting($clean_uri, null);
   }

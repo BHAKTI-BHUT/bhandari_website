@@ -112,18 +112,22 @@ class Home_mdl extends CI_Model{
 	    }
 
 	    return (object)[
-	        'badge_text' => '⚡ Limited Time Offer: Flat 20% OFF on Advance Booking',
+	        'badge_text' => 'Limited Time Offer: Flat 20% OFF on Advance Booking',
 	        'headline' => 'Get Your Instant Free Moving Quote',
 	        'subheadline' => 'Guaranteed Best Price & 100% Safe Shifting Across Noida & Greater Noida. Trusted by 15,000+ Happy Families!',
 	        'offer_tag' => 'Flat 20% OFF',
 	        'feature_1_title' => 'Zero Hidden Charges',
 	        'feature_1_desc' => 'Transparent all-inclusive pricing with complete breakdown upfront',
+	        'feature_1_icon' => 'bi bi-shield-fill-check',
 	        'feature_2_title' => 'Free Pre-Move Survey',
 	        'feature_2_desc' => 'Doorstep or video survey by relocation expert at zero cost',
+	        'feature_2_icon' => 'bi bi-camera-video-fill',
 	        'feature_3_title' => '₹5 Lakh Transit Insurance',
 	        'feature_3_desc' => 'Complete coverage for household goods against any damage',
+	        'feature_3_icon' => 'bi bi-shield-lock-fill',
 	        'feature_4_title' => 'GPS Live Tracking',
 	        'feature_4_desc' => 'Real-time vehicle tracking directly on your mobile device',
+	        'feature_4_icon' => 'bi bi-geo-alt-fill',
 	        'cta_button_text' => 'Get Free Quote Now',
 	        'phone_number' => '+91 7303257332',
 	        'whatsapp_number' => '917303257332',

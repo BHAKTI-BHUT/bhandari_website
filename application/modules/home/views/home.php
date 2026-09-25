@@ -750,9 +750,12 @@
   z-index: 15;
 }
 @media (max-width: 768px) {
+  .hero-slider {
+    height: 380px !important;
+  }
   .cards-slid {
-    margin-top: -520px;
-    margin-bottom: 50px;
+    margin-top: -340px !important;
+    margin-bottom: 0px !important;
     z-index: 10;
   }
   .hero-slider .row > .col-12 {

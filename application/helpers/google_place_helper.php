@@ -211,7 +211,7 @@ if (!function_exists('get_all_approved_reviews')) {
  * Supports page aliases, city matching, and smart 4-tier fallback.
  */
 if (!function_exists('get_seo_setting')) {
-    function get_seo_setting($pageName = 'home', $location = null)
+    function get_seo_setting($pageName = 'home', $location = null, $subLocation = null)
     {
         try {
             $db = get_admin_db_instance();
@@ -219,10 +219,15 @@ if (!function_exists('get_seo_setting')) {
                 return null;
             }
 
-            $rawPage = strtolower(trim((string)$pageName));
-            $rawLoc  = !empty($location) ? strtolower(trim((string)$location)) : null;
+            $rawPage   = strtolower(trim((string)$pageName));
+            $rawLoc    = !empty($location) ? strtolower(trim((string)$location)) : null;
+            $rawSubLoc = !empty($subLocation) ? strtolower(trim((string)$subLocation)) : null;
+
             if ($rawLoc === 'global' || $rawLoc === 'all') {
                 $rawLoc = null;
+            }
+            if ($rawSubLoc === 'global' || $rawSubLoc === 'all') {
+                $rawSubLoc = null;
             }
 
             // Generate candidate page aliases for flexible matching
@@ -241,7 +246,8 @@ if (!function_exists('get_seo_setting')) {
                 ['my-bookings', 'my_bookings'],
                 ['photo-gallery', 'photo_gallery', 'gallery'],
                 ['video-gallery', 'video_gallery'],
-                ['blogs', 'blog']
+                ['blogs', 'blog'],
+                ['location_page', 'sub_city_page', 'home_shifting_page']
             ];
 
             $pageCandidates = [$rawPage];
@@ -252,7 +258,35 @@ if (!function_exists('get_seo_setting')) {
                 }
             }
 
-            // 1. If location is provided: Check Exact Page + Location
+            // 1. If Sub-Location is provided: check sub_location match
+            if (!empty($rawSubLoc)) {
+                // 1a: Exact Page + Sub Location (and Location if present)
+                $db->where_in('page_name', $pageCandidates);
+                if (!empty($rawLoc)) {
+                    $db->where('LOWER(location)', $rawLoc);
+                }
+                $db->where('LOWER(sub_location)', $rawSubLoc);
+                $row = $db->get('seo_settings')->row_array();
+                if (!empty($row)) {
+                    return $row;
+                }
+
+                // 1b: Any rule matching sub_location
+                $db->where('LOWER(sub_location)', $rawSubLoc);
+                $row = $db->get('seo_settings')->row_array();
+                if (!empty($row)) {
+                    return $row;
+                }
+
+                // 1c: Sub-location saved in location field
+                $db->where('LOWER(location)', $rawSubLoc);
+                $row = $db->get('seo_settings')->row_array();
+                if (!empty($row)) {
+                    return $row;
+                }
+            }
+
+            // 2. If location is provided: Check Exact Page + Location
             if (!empty($rawLoc)) {
                 $db->where_in('page_name', $pageCandidates);
                 $db->where('LOWER(location)', $rawLoc);
@@ -261,7 +295,7 @@ if (!function_exists('get_seo_setting')) {
                     return $row;
                 }
 
-                // 2. Location-Page fallback: Check location_page + Location
+                // Location-Page fallback: Check location_page + Location
                 $db->where('page_name', 'location_page');
                 $db->where('LOWER(location)', $rawLoc);
                 $row = $db->get('seo_settings')->row_array();

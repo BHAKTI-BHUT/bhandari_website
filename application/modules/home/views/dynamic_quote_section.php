@@ -63,17 +63,32 @@ $qs_headline    = (!empty($quote_section) && !empty($quote_section->headline)) ?
 $qs_subheadline = (!empty($quote_section) && !empty($quote_section->subheadline)) ? $quote_section->subheadline : 'Guaranteed Best Price & 100% Safe Shifting Across Noida & Greater Noida. Trusted by 15,000+ Happy Families!';
 $qs_offer_tag   = $has_active_discount ? $qs_offer_tag_raw : '';
 
+$format_usp_icon = function($icon_class, $default_icon) {
+    $icon = trim((string)$icon_class);
+    if (empty($icon)) {
+        return $default_icon;
+    }
+    if (preg_match('/^bi-[a-z0-9-]+$/i', $icon)) {
+        return 'bi ' . $icon;
+    }
+    return $icon;
+};
+
 $qs_f1_title    = (!empty($quote_section) && !empty($quote_section->feature_1_title)) ? $quote_section->feature_1_title : 'Zero Hidden Charges';
 $qs_f1_desc     = (!empty($quote_section) && !empty($quote_section->feature_1_desc)) ? $quote_section->feature_1_desc : 'Transparent all-inclusive pricing with complete breakdown upfront';
+$qs_f1_icon     = $format_usp_icon($quote_section->feature_1_icon ?? null, 'bi bi-shield-fill-check');
 
 $qs_f2_title    = (!empty($quote_section) && !empty($quote_section->feature_2_title)) ? $quote_section->feature_2_title : 'Free Pre-Move Survey';
 $qs_f2_desc     = (!empty($quote_section) && !empty($quote_section->feature_2_desc)) ? $quote_section->feature_2_desc : 'Doorstep or video survey by relocation expert at zero cost';
+$qs_f2_icon     = $format_usp_icon($quote_section->feature_2_icon ?? null, 'bi bi-camera-video-fill');
 
 $qs_f3_title    = (!empty($quote_section) && !empty($quote_section->feature_3_title)) ? $quote_section->feature_3_title : '₹5 Lakh Transit Insurance';
 $qs_f3_desc     = (!empty($quote_section) && !empty($quote_section->feature_3_desc)) ? $quote_section->feature_3_desc : 'Complete coverage for household goods against any transit damage';
+$qs_f3_icon     = $format_usp_icon($quote_section->feature_3_icon ?? null, 'bi bi-shield-lock-fill');
 
 $qs_f4_title    = (!empty($quote_section) && !empty($quote_section->feature_4_title)) ? $quote_section->feature_4_title : 'GPS Live Tracking';
 $qs_f4_desc     = (!empty($quote_section) && !empty($quote_section->feature_4_desc)) ? $quote_section->feature_4_desc : 'Real-time vehicle tracking directly on your mobile device';
+$qs_f4_icon     = $format_usp_icon($quote_section->feature_4_icon ?? null, 'bi bi-geo-alt-fill');
 
 $qs_phone       = (!empty($quote_section) && !empty($quote_section->phone_number)) ? $quote_section->phone_number : '+91 7303257332';
 $qs_clean_phone = preg_replace('/[^0-9]/', '', $qs_phone);
@@ -95,7 +110,7 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
       <div class="col-lg-10 col-xl-9">
         <?php if ($has_active_offer && !empty($qs_badge)): ?>
         <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm mb-3" style="background: linear-gradient(180deg, #0B2562 0%, #001C66 100%); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">
-          <i class="bi bi-stars text-warning fs-6"></i>
+          
           <span class="fw-bold text-white small"><?= htmlspecialchars($qs_badge) ?></span>
         </div>
         <?php endif; ?>
@@ -113,7 +128,7 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
       <div class="col-6 col-lg-3">
         <div class="dynamic-usp-card p-3 p-md-4 h-100 rounded-4 text-center">
           <div class="usp-icon-wrap usp-icon-green mx-auto mb-3">
-            <i class="bi bi-shield-fill-check"></i>
+            <i class="<?= htmlspecialchars($qs_f1_icon) ?>"></i>
           </div>
           <h3 class="fs-6 fw-bold text-dark mb-1"><?= htmlspecialchars($qs_f1_title) ?></h3>
           <p class="text-muted small mb-0"><?= htmlspecialchars($qs_f1_desc) ?></p>
@@ -122,7 +137,7 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
       <div class="col-6 col-lg-3">
         <div class="dynamic-usp-card p-3 p-md-4 h-100 rounded-4 text-center">
           <div class="usp-icon-wrap usp-icon-blue mx-auto mb-3">
-            <i class="bi bi-camera-video-fill"></i>
+            <i class="<?= htmlspecialchars($qs_f2_icon) ?>"></i>
           </div>
           <h3 class="fs-6 fw-bold text-dark mb-1"><?= htmlspecialchars($qs_f2_title) ?></h3>
           <p class="text-muted small mb-0"><?= htmlspecialchars($qs_f2_desc) ?></p>
@@ -131,7 +146,7 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
       <div class="col-6 col-lg-3">
         <div class="dynamic-usp-card p-3 p-md-4 h-100 rounded-4 text-center">
           <div class="usp-icon-wrap usp-icon-orange mx-auto mb-3">
-            <i class="bi bi-shield-lock-fill"></i>
+            <i class="<?= htmlspecialchars($qs_f3_icon) ?>"></i>
           </div>
           <h3 class="fs-6 fw-bold text-dark mb-1"><?= htmlspecialchars($qs_f3_title) ?></h3>
           <p class="text-muted small mb-0"><?= htmlspecialchars($qs_f3_desc) ?></p>
@@ -140,7 +155,7 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
       <div class="col-6 col-lg-3">
         <div class="dynamic-usp-card p-3 p-md-4 h-100 rounded-4 text-center">
           <div class="usp-icon-wrap usp-icon-yellow mx-auto mb-3">
-            <i class="bi bi-geo-alt-fill"></i>
+            <i class="<?= htmlspecialchars($qs_f4_icon) ?>"></i>
           </div>
           <h3 class="fs-6 fw-bold text-dark mb-1"><?= htmlspecialchars($qs_f4_title) ?></h3>
           <p class="text-muted small mb-0"><?= htmlspecialchars($qs_f4_desc) ?></p>
@@ -242,7 +257,7 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
                   <div class="price-display-card p-3 p-md-4 rounded-4 bg-light border">
                     <span class="text-muted small text-uppercase fw-semibold d-block"><?= htmlspecialchars($item->price_prefix ?: 'Estimated Starting Rate') ?></span>
                     <div class="d-flex justify-content-center justify-content-lg-end align-items-baseline gap-1 my-2">
-                      <span class="h2 fw-bolder text-primary mb-0"><?= htmlspecialchars($item->price_from) ?></span>
+                      <span class="h2 fw-bolder calc-price-val mb-0"><?= htmlspecialchars($item->price_from) ?></span>
                       <?php if (!empty($item->price_to)): ?>
                         <span class="text-muted fs-6"><?= htmlspecialchars($item->price_to) ?></span>
                       <?php endif; ?>
@@ -593,4 +608,24 @@ if (typeof jQuery !== 'undefined') {
 .bg-danger-subtle  { background-color: rgba(220, 53, 69, 0.12) !important; }
 .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.18) !important; }
 .bg-info-subtle    { background-color: rgba(13, 202, 240, 0.12) !important; }
+
+/* Custom Calculator Tabs & Price styling - matching footer base color #0B2562 */
+.estimator-tabs .nav-link {
+  color: #0B2562 !important;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+.estimator-tabs .nav-link:hover:not(.active) {
+  background-color: rgba(11, 37, 98, 0.08) !important;
+  color: #0B2562 !important;
+}
+.estimator-tabs .nav-link.active {
+  background: linear-gradient(180deg, #0B2562 0%, #001C66 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(11, 37, 98, 0.3) !important;
+}
+.calc-price-val,
+.quote-estimator-box .text-primary {
+  color: #0B2562 !important;
+}
 </style>
