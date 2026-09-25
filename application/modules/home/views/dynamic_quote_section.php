@@ -430,15 +430,17 @@ $qs_wa          = (!empty($quote_section) && !empty($quote_section->whatsapp_num
               <h6 class="fw-bold text-dark mb-1">Option 1: Quick Call Back (Fast Lead)</h6>
               <p class="text-muted small mb-2">Enter phone number to get instant callback within 5 minutes.</p>
               
-              <form id="quickInquiryForm" class="d-flex flex-column flex-sm-row gap-2">
-                <input type="hidden" name="service_type" id="quick_service_type" value="Instant Quote">
-                <input type="hidden" name="source_page" value="Homepage Calculator Modal">
-                <input type="tel" name="phone" id="quick_phone_input" class="form-control form-control-sm border-success fw-semibold" placeholder="10-digit mobile number" maxlength="10" required>
-                <button type="submit" class="btn btn-sm btn-success fw-bold text-nowrap px-3" id="quick_submit_btn">
-                  <i class="bi bi-telephone-fill me-1"></i> Call Me Back
-                </button>
-              </form>
-              <div id="quickInquiryAlert" class="mt-2 small d-none"></div>
+              <div class="quickInquiryFormWrap mt-3">
+                <input type="hidden" name="service_type" class="quick_service_type" value="Instant Quote">
+                <input type="hidden" name="source_page" class="quick_source_page" value="Homepage Calculator Modal">
+                <div class="d-flex flex-column flex-sm-row w-100" style="gap: 12px;">
+                  <input type="tel" name="phone" class="quick_phone_input form-control border-success fw-semibold mb-2 mb-sm-0" placeholder="10-digit mobile number" maxlength="10">
+                  <button type="button" class="quick_submit_btn btn btn-success fw-bold text-nowrap px-3">
+                    <i class="bi bi-telephone-fill me-1"></i> Call Me Back
+                  </button>
+                </div>
+              </div>
+              <div class="quickInquiryAlert mt-2 small d-none"></div>
             </div>
           </div>
         </div>
@@ -475,8 +477,8 @@ var currentSelectedService = 'Instant Shifting Quote';
 function openInquiryModal(serviceTitle) {
   currentSelectedService = serviceTitle || 'Instant Shifting Quote';
   $('#inquiry-service-subtitle').text('Service: ' + currentSelectedService);
-  $('#quick_service_type').val(currentSelectedService);
-  $('#quickInquiryAlert').addClass('d-none').removeClass('alert-success alert-danger').text('');
+  $('.quick_service_type').val(currentSelectedService);
+  $('.quickInquiryAlert').addClass('d-none').removeClass('alert-success alert-danger').text('');
   
   var modalEl = document.getElementById('inquiryChoiceModal');
   if (modalEl) {
@@ -528,11 +530,15 @@ if (typeof jQuery !== 'undefined') {
       scrollToQuoteForm(currentSelectedService);
     });
 
-    $('#quickInquiryForm').on('submit', function(e) {
+    // Unbind any previous click handlers to prevent duplicates if file included multiple times
+    $(document).off('click', '.quick_submit_btn').on('click', '.quick_submit_btn', function(e) {
       e.preventDefault();
-      var btn = $('#quick_submit_btn');
-      var alertBox = $('#quickInquiryAlert');
-      var phoneVal = $('#quick_phone_input').val();
+      var btn = $(this);
+      var wrap = btn.closest('.quickInquiryFormWrap');
+      var alertBox = wrap.parent().find('.quickInquiryAlert');
+      var phoneVal = wrap.find('.quick_phone_input').val();
+      var serviceType = wrap.find('.quick_service_type').val();
+      var sourcePage = wrap.find('.quick_source_page').val();
 
       if (!phoneVal || phoneVal.length < 10) {
         alertBox.removeClass('d-none alert-success').addClass('alert alert-danger py-1 px-2 mb-0').text('Please enter a valid 10-digit mobile number.');
@@ -545,13 +551,17 @@ if (typeof jQuery !== 'undefined') {
       $.ajax({
         url: '<?= base_url('contacts/submit-quick-inquiry') ?>',
         type: 'POST',
-        data: $(this).serialize(),
+        data: {
+          phone: phoneVal,
+          service_type: serviceType,
+          source_page: sourcePage
+        },
         dataType: 'json',
         success: function(res) {
           btn.prop('disabled', false).html('<i class="bi bi-telephone-fill me-1"></i> Call Me Back');
           if (res.status === 'success') {
             alertBox.removeClass('d-none alert-danger').addClass('alert alert-success py-1 px-2 mb-0').text(res.message);
-            $('#quick_phone_input').val('');
+            wrap.find('.quick_phone_input').val('');
           } else {
             alertBox.removeClass('d-none alert-success').addClass('alert alert-danger py-1 px-2 mb-0').text(res.message);
           }
